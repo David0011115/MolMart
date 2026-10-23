@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Холодильник — товары и цены</title>
+<link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#e9f1f2;--surface:#fff;--ink:#0f2a33;--muted:#5d747c;--line:#cddde0;
+  --tag:#ffd84a;--tag-ink:#1b1b10;--accent:#0b7a8a;--shadow:0 1px 2px rgba(15,42,51,.08);
+  color-scheme:light;
+  box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0c1a1f;--surface:#14282f;--ink:#e6f1f3;--muted:#8fa8af;--line:#24404a;
+  --tag:#ffd84a;--tag-ink:#1b1b10;--accent:#4cc3d3;--shadow:none;color-scheme:dark;}}
+:root[data-theme="dark"]{--bg:#0c1a1f;--surface:#14282f;--ink:#e6f1f3;--muted:#8fa8af;--line:#24404a;--accent:#4cc3d3;--shadow:none;color-scheme:dark}
+*{box-sizing:border-box}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font:400 16px/1.45 Onest,system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.wrap{max-width:760px;margin:0 auto;padding:0 16px 40px}
+header{padding:22px 0 12px}
+h1{font:700 26px/1.1 Unbounded,Onest,system-ui,sans-serif;margin:0 0 6px;letter-spacing:-.01em}
+.sub{color:var(--muted);margin:0;font-size:14px}
+.bar{position:sticky;top:env(safe-area-inset-top,0px);background:var(--bg);padding:8px 0 10px;z-index:5}
+.search{width:100%;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:12px 14px;font:inherit}
+.search:focus-visible,.chip:focus-visible,.card:focus-visible,.close:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 0 2px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:999px;padding:7px 14px;font:500 14px Onest,system-ui,sans-serif;cursor:pointer}
+.chip[aria-pressed="true"]{background:var(--ink);color:var(--bg);border-color:var(--ink)}
+.grid{display:grid;grid-template-columns:repeat(2,1fr);gap:12px;margin-top:8px}
+@media(min-width:620px){.grid{grid-template-columns:repeat(3,1fr)}}
+.card{all:unset;box-sizing:border-box;cursor:pointer;display:flex;flex-direction:column;background:var(--surface);border-radius:14px;overflow:hidden;box-shadow:var(--shadow);border:1px solid var(--line)}
+.pic{aspect-ratio:1/1;display:grid;place-items:center;background:linear-gradient(160deg,#dff0f3,#f4fafb);font-size:64px;overflow:hidden}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .pic{background:linear-gradient(160deg,#1b3842,#14282f)}}
+.pic img{width:100%;height:100%;object-fit:cover}
+.body{padding:10px 12px 12px;display:flex;flex-direction:column;gap:4px;flex:1}
+.name{font-weight:700;font-size:15px;line-height:1.25}
+.meta{color:var(--muted);font-size:13px}
+.price{margin-top:auto;align-self:flex-start;background:var(--tag);color:var(--tag-ink);font:700 17px Unbounded,Onest,sans-serif;padding:5px 10px 5px 14px;border-radius:4px 8px 8px 4px;position:relative;margin-top:8px}
+.price::before{content:"";position:absolute;left:5px;top:50%;width:5px;height:5px;margin-top:-2.5px;border-radius:50%;background:rgba(0,0,0,.35)}
+.empty{text-align:center;color:var(--muted);padding:40px 0}
+dialog{border:0;padding:0;width:min(560px,100%);max-height:88vh;margin:auto auto 0;border-radius:20px 20px 0 0;background:var(--surface);color:var(--ink);overflow:auto}
+dialog::backdrop{background:rgba(5,15,18,.55)}
+@media(min-width:620px){dialog{margin:auto;border-radius:20px}}
+.sheet{padding:0 0 calc(24px + env(safe-area-inset-bottom,0px))}
+.sheet .pic{aspect-ratio:16/9;font-size:96px}
+.in{padding:18px 20px 0}
+.in h2{font:700 21px/1.2 Unbounded,Onest,sans-serif;margin:0 0 4px}
+.in h3{font-size:14px;margin:18px 0 4px;color:var(--muted);font-weight:500}
+.in p{margin:0}
+.row{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:12px}
+.row .price{margin:0;font-size:22px}
+.close{position:absolute;right:12px;top:12px;width:40px;height:40px;border-radius:50%;border:0;background:var(--surface);color:var(--ink);font-size:22px;cursor:pointer;box-shadow:0 1px 4px rgba(0,0,0,.25)}
+footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:28px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1 id="title">Холодильник</h1>
+    <p class="sub" id="subtitle">Товары и цены. Оплата на кассе.</p>
+  </header>
+  <div class="bar">
+    <input class="search" id="q" type="search" placeholder="Найти товар" aria-label="Поиск товара" autocomplete="off">
+    <div class="chips" id="chips"></div>
+  </div>
+  <main class="grid" id="grid"></main>
+  <div class="empty" id="empty" hidden>Ничего не найдено. Попробуйте другое название.</div>
+  <footer id="footer"></footer>
+</div>
+
+<dialog id="dlg" aria-label="Карточка товара"><div class="sheet" id="sheet"></div></dialog>
+
+<script>
+/* ===== НАСТРОЙКИ МАГАЗИНА ===== */
+const SETTINGS = {
+  title: "Холодильник",
+  subtitle: "Товары и цены. Оплата на кассе.",
+  currency: "₸",
+  footer: "Цены актуальны на момент сканирования."
+};
+
+/* ===== ТОВАРЫ (примеры — заменим вашими) =====
+   image: ссылка/встроенное изображение; если пусто — показывается emoji */
+const PRODUCTS = [
+  {name:"Молоко 3,2%", category:"Молочное", weight:"930 мл", price:690, emoji:"🥛",
+   composition:"Молоко цельное нормализованное.", shelfLife:"7 суток при +2…+6 °C", nutrition:"На 100 г: белки 3,0 г, жиры 3,2 г, углеводы 4,7 г, 60 ккал"},
+  {name:"Кефир 2,5%", category:"Молочное", weight:"900 г", price:720, emoji:"🥤",
+   composition:"Молоко нормализованное, закваска кефирных грибков.", shelfLife:"10 суток", nutrition:"На 100 г: белки 3,0 г, жиры 2,5 г, углеводы 4,0 г, 51 ккал"},
+  {name:"Йогурт клубничный", category:"Молочное", weight:"125 г", price:260, emoji:"🍓",
+   composition:"Молоко, сахар, клубничный наполнитель, закваска, загуститель (крахмал).", shelfLife:"21 сутки", nutrition:"На 100 г: белки 3,0 г, жиры 2,5 г, углеводы 14 г, 92 ккал"},
+  {name:"Сыр «Российский»", category:"Сыры", weight:"200 г", price:1650, emoji:"🧀",
+   composition:"Молоко пастеризованное, соль, закваска, сычужный фермент.", shelfLife:"60 суток", nutrition:"На 100 г: белки 23 г, жиры 50 г, 360 ккал"},
+  {name:"Колбаса варёная", category:"Мясное", weight:"400 г", price:1890, emoji:"🥩",
+   composition:"Говядина, свинина, вода, соль, специи, антиокислитель.", shelfLife:"15 суток", nutrition:"На 100 г: белки 12 г, жиры 22 г, 250 ккал"},
+  {name:"Сок яблочный", category:"Напитки", weight:"1 л", price:950, emoji:"🧃",
+   composition:"Сок яблочный восстановленный.", shelfLife:"12 месяцев, после вскрытия — 3 суток", nutrition:"На 100 мл: углеводы 11 г, 46 ккал"}
+];
+/* ===== КОНЕЦ НАСТРОЕК ===== */
+
+const $ = id => document.getElementById(id);
+const fmt = n => new Intl.NumberFormat("ru-RU").format(n) + "\u00a0" + SETTINGS.currency;
+let cat = "Все", query = "";
+
+function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
+function pic(p){return p.image ? `<img src="${esc(p.image)}" alt="${esc(p.name)}" loading="lazy">` : esc(p.emoji||"🧊")}
+
+function renderChips(){
+  const cats = ["Все", ...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
+  $("chips").innerHTML = cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${esc(c)}">${esc(c)}</button>`).join("");
+}
+function renderGrid(){
+  const q = query.trim().toLowerCase();
+  const list = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>
+    (cat==="Все"||p.category===cat) && (!q || (p.name+" "+(p.composition||"")).toLowerCase().includes(q)));
+  $("grid").innerHTML = list.map(({p,i})=>`
+    <button class="card" data-i="${i}">
+      <div class="pic">${pic(p)}</div>
+      <div class="body">
+        <div class="name">${esc(p.name)}</div>
+        <div class="meta">${esc(p.weight||"")}</div>
+        <div class="price">${fmt(p.price)}</div>
+      </div>
+    </button>`).join("");
+  $("empty").hidden = list.length>0;
+}
+function openCard(i){
+  const p = PRODUCTS[i];
+  const block = (t,v)=> v ? `<h3>${t}</h3><p>${esc(v)}</p>` : "";
+  $("sheet").innerHTML = `
+    <button class="close" aria-label="Закрыть" id="x">×</button>
+    <div class="pic">${pic(p)}</div>
+    <div class="in">
+      <h2>${esc(p.name)}</h2>
+      <div class="meta">${esc([p.category,p.weight].filter(Boolean).join(", "))}</div>
+      <div class="row"><span class="price">${fmt(p.price)}</span></div>
+      ${block("Состав",p.composition)}
+      ${block("Пищевая ценность",p.nutrition)}
+      ${block("Срок годности",p.shelfLife)}
+    </div>`;
+  $("x").onclick = ()=>$("dlg").close();
+  $("dlg").showModal();
+}
+
+$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderChips();renderGrid()});
+$("q").addEventListener("input",e=>{query=e.target.value;renderGrid()});
+$("grid").addEventListener("click",e=>{const c=e.target.closest(".card");if(c)openCard(+c.dataset.i)});
+$("dlg").addEventListener("click",e=>{if(e.target===$("dlg"))$("dlg").close()});
+
+document.title = SETTINGS.title + " — товары и цены";
+$("title").textContent = SETTINGS.title;
+$("subtitle").textContent = SETTINGS.subtitle;
+$("footer").textContent = SETTINGS.footer;
+renderChips();renderGrid();
+</script>
+</body>
+</html>
