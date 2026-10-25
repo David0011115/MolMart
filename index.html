@@ -83,6 +83,10 @@ dialog.zm::after{content:"×";position:fixed;top:10px;right:18px;color:#fff;font
 .r-sale{background:#d93a3a}.r-sale::before{content:"%"}
 .r-spicy{background:#9c1c2c}.r-spicy::before{content:"\1F336"}
 .rib i{font-style:normal}
+.selrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.sel{display:flex;flex-direction:column;gap:3px;min-width:0}
+.sel span{font:600 12px Onest,system-ui,sans-serif;color:var(--muted);padding-left:4px}
+.sel select{width:100%;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:10px;font:500 14px Onest,system-ui,sans-serif}
 @media (max-width:640px){
   .card .ribs{top:6px}
   .card .rib{padding:5px 8px 5px 14px;font-size:12px}
@@ -157,8 +161,8 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
     <p class="upd" id="upd"></p>
   </header>
   <div class="bar">
-    <div class="srow"><input class="search" id="q" type="search" autocomplete="off"><select class="sort" id="sort"></select></div>
-    <div class="chips" id="chips"></div>
+    <input class="search" id="q" type="search" autocomplete="off">
+    <div class="selrow"><label class="sel"><span id="catlbl"></span><select id="catsel"></select></label><label class="sel"><span id="sortlbl"></span><select id="sort"></select></label></div>
     <div class="chips tags" id="tags"></div>
   </div>
   <main class="grid" id="grid"></main>
@@ -199,14 +203,14 @@ const LABELS = {
 const CAT_KK = {"Сэндвичи":"Сэндвичтер","Панини":"Панини","Хот-доги":"Хот-догтар","Бургеры":"Бургерлер","Донер":"Дөнер","Кимпаб":"Кимпаб","Онигири":"Онигири","Пицца":"Пицца"};
 
 const STR = {
-  ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все",
+  ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки"},
-  kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлығы",
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки"},
+  kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар"}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар"}
 };
 
 /* ===== ТОВАРЫ =====
@@ -323,8 +327,7 @@ function badges(p){
 
 function renderChips(){
   const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
-  $("chips").innerHTML = [`<button class="chip" aria-pressed="${cat==="ALL"}" data-c="ALL">${esc(T("all"))}</button>`]
-    .concat(cats.map(c=>`<button class="chip" aria-pressed="${c===cat}" data-c="${esc(c)}">${esc(catName(c))}</button>`)).join("");
+  $("catsel").innerHTML = [["ALL",T("all")]].concat(cats.map(c=>[c,catName(c)])).map(([v,n])=>`<option value="${esc(v)}"${v===cat?" selected":""}>${esc(n)}</option>`).join("");
   const used = Object.keys(LABELS).filter(k=>PRODUCTS.some(p=>(p.labels||[]).includes(k)));
   $("tags").innerHTML = used.map(k=>`<button class="chip" aria-pressed="${activeTags.has(k)}" data-t="${k}">${esc(lbl(k))}</button>`).join("");
 }
@@ -380,8 +383,8 @@ function applyLang(){
   $("subtitle").textContent = T("subtitle");
   $("upd").textContent = T("updated") + ": " + SETTINGS.updated;
   $("q").placeholder = T("search"); $("q").setAttribute("aria-label", T("search"));
-  $("sort").setAttribute("aria-label", T("sort"));
-  $("sort").innerHTML = [["def","sd"],["asc","sa"],["desc","sdsc"],["new","sn"]].map(([v,k])=>`<option value="${v}"${v===sortMode?" selected":""}>${esc(T(k))}</option>`).join("");
+  $("sort").setAttribute("aria-label", T("sort")); $("sortlbl").textContent = T("sort"); $("catlbl").textContent = T("cat"); $("catsel").setAttribute("aria-label", T("cat"));
+  $("sort").innerHTML = [["def","sd"],["asc","sa"],["desc","sdsc"]].map(([v,k])=>`<option value="${v}"${v===sortMode?" selected":""}>${esc(T(k))}</option>`).join("");
   $("empty").textContent = T("empty");
   $("footer").textContent = T("footer");
   $("dlg").setAttribute("aria-label", T("dlg"));
@@ -390,7 +393,7 @@ function applyLang(){
   if($("dlg").open && curIdx>=0) renderSheet(curIdx);
 }
 
-$("chips").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;cat=b.dataset.c;renderChips();renderGrid()});
+$("catsel").addEventListener("change",e=>{cat=e.target.value;renderGrid()});
 $("tags").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const t=b.dataset.t;activeTags.has(t)?activeTags.delete(t):activeTags.add(t);renderChips();renderGrid()});
 $("q").addEventListener("input",e=>{query=e.target.value;renderGrid(false)});
 $("sort").addEventListener("change",e=>{sortMode=e.target.value;renderGrid()});
