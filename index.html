@@ -165,6 +165,29 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .shop{margin-top:24px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.5}
 .shop h2{font:700 15px Unbounded,Onest,sans-serif;margin:0 0 6px}
 .shop p{margin:2px 0}.shop a{color:var(--accent)}
+/* ===== ВИЗУАЛЬНЫЕ ЭФФЕКТЫ ===== */
+/* 1. блик по логотипу */
+.brand,.brand b{background-size:250% 100%,100% 100%;background-repeat:no-repeat;animation:shine 7s ease-in-out infinite}
+.brand{background-image:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.85) 50%,transparent 58%),linear-gradient(90deg,var(--b1),var(--b2) 50%,var(--b3))}
+.brand b{background-image:linear-gradient(105deg,transparent 42%,rgba(255,255,255,.85) 50%,transparent 58%),linear-gradient(90deg,var(--b3),var(--b4))}
+@keyframes shine{0%,55%{background-position:130% 0,0 0}85%,100%{background-position:-30% 0,0 0}}
+/* 4. блик на ценнике со скидкой */
+.old+.price{overflow:hidden;box-shadow:0 0 0 2px rgba(217,58,58,.25)}
+.old+.price::after{content:"";position:absolute;top:0;bottom:0;left:-60%;width:45%;background:linear-gradient(100deg,transparent,rgba(255,255,255,.75),transparent);transform:skewX(-18deg);animation:tagshine 3.6s ease-in-out infinite}
+@keyframes tagshine{0%,60%{left:-60%}100%{left:130%}}
+/* 5. мягкие цветные тени */
+.card,.pc{box-shadow:0 8px 22px -12px rgba(31,181,204,.45),0 12px 26px -16px rgba(240,139,208,.45),0 1px 2px rgba(60,40,10,.06);transition:transform .15s ease,box-shadow .2s ease}
+@media (hover:hover){.card:hover,.pc:hover{transform:translateY(-2px);box-shadow:0 12px 28px -12px rgba(31,181,204,.55),0 16px 32px -16px rgba(240,139,208,.55),0 1px 2px rgba(60,40,10,.06)}}
+/* 6. плавающие цветные пятна на фоне */
+.blobs{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.blobs i{position:absolute;width:70vmax;height:70vmax;border-radius:50%;opacity:.22;will-change:transform}
+.blobs i:nth-child(1){background:radial-gradient(circle,var(--b1),transparent 62%);left:-30vmax;top:-25vmax;animation:drift1 26s ease-in-out infinite alternate}
+.blobs i:nth-child(2){background:radial-gradient(circle,var(--b3),transparent 62%);right:-32vmax;top:20vh;animation:drift2 32s ease-in-out infinite alternate}
+.blobs i:nth-child(3){background:radial-gradient(circle,var(--b4),transparent 62%);left:-10vmax;bottom:-40vmax;animation:drift3 29s ease-in-out infinite alternate}
+@keyframes drift1{to{transform:translate(22vmax,18vmax) scale(1.1)}}
+@keyframes drift2{to{transform:translate(-20vmax,24vmax) scale(.9)}}
+@keyframes drift3{to{transform:translate(18vmax,-22vmax) scale(1.15)}}
+@media (prefers-reduced-motion:reduce){.brand,.brand b,.old+.price::after,.blobs i{animation:none}}
 </style>
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
@@ -181,6 +204,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 </head>
 <body>
 <noscript><div><img src="https://mc.yandex.ru/watch/113767885" style="position:absolute; left:-9999px;" alt="" /></div></noscript>
+<div class="blobs" aria-hidden="true"><i></i><i></i><i></i></div>
 <div class="wm" aria-hidden="true"><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span></div>
 <div class="wrap">
   <header>
