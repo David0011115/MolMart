@@ -243,7 +243,8 @@ const SETTINGS = {
   title: "MolMart",
   currency: "₸",
   updated: "24.10.2026",  /* запасная дата, если в prices.csv колонка «Изменено» пустая */
-  pricesFile: "prices.csv" /* таблица цен, скидок и меток: цены меняются там, а не в коде */
+  pricesFile: "prices.csv", /* запасная таблица цен в репозитории */
+  pricesSheet: ""          /* ссылка на опубликованную Google Таблицу (CSV); если пусто или недоступна — берётся pricesFile */
 };
 
 /* ===== ИНФОРМАЦИЯ О МАГАЗИНЕ (заготовка) =====
@@ -651,9 +652,13 @@ $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic">
 
 (async()=>{
   try{
-    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),4000);
-    const r=await fetch(SETTINGS.pricesFile+"?v="+Date.now(),{cache:"no-store",signal:ctl.signal});
-    clearTimeout(to); if(r.ok) applyPrices(await r.text());
+    const get=async(url,ms)=>{ const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),ms);
+      try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
+        const t=r.ok?await r.text():""; return /товар/i.test(t.split("\n")[0]||"")?t:""; } finally{ clearTimeout(to); } };
+    let text="";
+    if(SETTINGS.pricesSheet){ try{ text=await get(SETTINGS.pricesSheet,4000); }catch(e){} }
+    if(!text){ try{ text=await get(SETTINGS.pricesFile,4000); }catch(e){} }
+    if(text) applyPrices(text);
   }catch(e){}
   applyLang();
 })();
