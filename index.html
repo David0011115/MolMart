@@ -396,6 +396,17 @@ const PRODUCTS = [
 ];
 /* ===== КОНЕЦ НАСТРОЕК ===== */
 
+/* «Новинка» показывается 14 дней с даты в колонке «Новинка с» (или newSince:"дд.мм.гггг" в товаре).
+   Таблица снимает метку сама (скрипт), сайт — подстраховка. Без даты метка не снимается. */
+const NEW_DAYS = 14;
+function expireNew(p){
+  const m=String(p.newSince||"").match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})/);
+  if(!m || !(p.labels||[]).includes("new")) return;
+  const end=new Date(+m[3],+m[2]-1,+m[1]+NEW_DAYS);
+  if(new Date()>=end) p.labels=p.labels.filter(l=>l!=="new");
+}
+PRODUCTS.forEach(expireNew);
+
 const $ = id => document.getElementById(id);
 let lang = "ru", cat = "ALL", query = "", activeTags = new Set(), curIdx = -1, sortMode = "def";
 try{ const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language||"").toLowerCase().startsWith("kk") ? "kk" : "ru"); }catch(e){}
@@ -410,7 +421,7 @@ const updTag = (p,cls) => (p.updated && p.price!=null) ? `<div class="${cls}">${
 const oldTag = p => hasOld(p) ? `<span class="old">${fmt(p.oldPrice)}</span>` : "";
 
 /* ===== ЗАГРУЗКА prices.csv =====
-   Колонки: Раздел, Товар, Бренд, Цена, Старая цена, Метки, Изменено.
+   Колонки: Раздел, Товар, Бренд, Цена, Старая цена, Метки, Изменено, Новинка с.
    Товар ищется по точному названию. Метки через запятую: Халал, Острое, Новинка, Хит, Акция.
    Если файл не загрузился, остаются значения из кода. */
 function parseCSV(t){
@@ -428,7 +439,7 @@ function applyPrices(text){
   const rows=parseCSV(text).filter(r=>r.some(x=>x.trim())); if(rows.length<2) return;
   const h=rows[0].map(x=>x.trim().toLowerCase()), col=n=>h.indexOf(n);
   const col2=(...ns)=>{for(const n of ns){const i=col(n); if(i>=0) return i;} return -1;};
-  const iN=col("товар"),iP=col2("текущая цена","цена"),iO=col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено");
+  const iN=col("товар"),iP=col2("текущая цена","цена"),iO=col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено"),iS=col("новинка с");
   if(iN<0) return; let last=null;
   for(const r of rows.slice(1)){
     const p=PRODUCTS.find(x=>x.name===(r[iN]||"").trim()); if(!p) continue;
@@ -436,6 +447,8 @@ function applyPrices(text){
     if(iO>=0) p.oldPrice=num(r[iO]);
     if(iL>=0) p.labels=(r[iL]||"").split(/[,;\/]/).map(x=>LABEL_BY_RU[x.trim().toLowerCase()]).filter(Boolean);
     if(hasOld(p) && !p.labels.includes("sale")) p.labels.push("sale");
+    if(iS>=0) p.newSince=(r[iS]||"").trim();
+    expireNew(p);
     p.updated = iD>=0 ? (r[iD]||"").trim() : "";
     const m=iD>=0 && (r[iD]||"").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
     if(m){const d=new Date(+m[3],+m[2]-1,+m[1]); if(!last||d>last.d) last={d,s:r[iD].trim()};}
