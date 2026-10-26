@@ -196,6 +196,8 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 @keyframes drift2{to{transform:translate(-20vmax,24vmax) scale(.9)}}
 @keyframes drift3{to{transform:translate(18vmax,-22vmax) scale(1.15)}}
 @media (prefers-reduced-motion:reduce){.brand,.brand b,.old+.price::after,.blobs i{animation:none}}
+.pdate{font-size:11.5px;color:var(--muted);margin-top:4px}
+.pdate.big{font-size:13px;margin-top:6px}
 </style>
 <!-- Yandex.Metrika counter -->
 <script type="text/javascript">
@@ -219,7 +221,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
     <div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div>
     <h1 class="brand" id="title" aria-label="MolMart">Mol<b>Mart</b></h1>
     <p class="sub" id="subtitle"></p>
-    <p class="upd" id="upd"></p>
+    <p class="upd" id="upd" hidden></p>
   </header>
   <div class="bar">
     <input class="search" id="q" type="search" autocomplete="off">
@@ -281,11 +283,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте"},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте"},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу"}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу"}
 };
 
 /* ===== ТОВАРЫ =====
@@ -391,6 +393,7 @@ const catName = c => lang==="kk" ? (CAT_KK[c]||c) : c;
 const lbl = k => (LABELS[k]||{})[lang] || k;
 const fmt = n => n==null ? T("noprice") : new Intl.NumberFormat("ru-RU").format(n) + "\u00a0" + SETTINGS.currency;
 const hasOld = p => p.oldPrice!=null && p.price!=null && p.oldPrice>p.price;
+const updTag = (p,cls) => (p.updated && p.price!=null) ? `<div class="${cls}">${esc(T("pupd"))} ${esc(p.updated)}</div>` : "";
 const oldTag = p => hasOld(p) ? `<span class="old">${fmt(p.oldPrice)}</span>` : "";
 
 /* ===== ЗАГРУЗКА prices.csv =====
@@ -419,6 +422,7 @@ function applyPrices(text){
     if(iO>=0) p.oldPrice=num(r[iO]);
     if(iL>=0) p.labels=(r[iL]||"").split(/[,;\/]/).map(x=>LABEL_BY_RU[x.trim().toLowerCase()]).filter(Boolean);
     if(hasOld(p) && !p.labels.includes("sale")) p.labels.push("sale");
+    p.updated = iD>=0 ? (r[iD]||"").trim() : "";
     const m=iD>=0 && (r[iD]||"").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
     if(m){const d=new Date(+m[3],+m[2]-1,+m[1]); if(!last||d>last.d) last={d,s:r[iD].trim()};}
   }
@@ -529,7 +533,7 @@ function renderGrid(anim=true){
       <div class="body">
         <div class="name" title="${esc(tr(p,"name"))}">${esc(shortName(p))}</div>
         <div class="meta">${esc([p.brand,p.weight].filter(Boolean).join(", "))}</div>
-        ${oldTag(p)}<div class="price${p.price==null?" nop":""}">${fmt(p.price)}</div>
+        ${oldTag(p)}<div class="price${p.price==null?" nop":""}">${fmt(p.price)}</div>${updTag(p,"pdate")}
       </div>
     </button>`).join("");
   $("empty").hidden = list.length>0;
@@ -545,6 +549,7 @@ function renderSheet(i){
       <h2>${esc(tr(p,"name"))}</h2>
       <div class="meta">${esc([p.brand,catName(p.category),p.weight].filter(Boolean).join(", "))}</div>
       <div class="row">${oldTag(p)}<span class="price${p.price==null?" nop":""}">${fmt(p.price)}</span></div>
+      ${updTag(p,"pdate big")}
       ${block(T("comp"),tr(p,"composition"))}
       ${block(T("nutr"),tr(p,"nutrition"))}
       ${block(T("shelf"),tr(p,"shelfLife"))}
