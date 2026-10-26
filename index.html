@@ -69,12 +69,6 @@ h1{font:700 clamp(17px,5vw,22px)/1.1 Unbounded,Onest,system-ui,sans-serif;color:
 .lb[aria-pressed="true"]{background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff}
 .lb:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .upd{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
-.adm{padding:24px 20px calc(24px + env(safe-area-inset-bottom,0px))}
-.adm h2{font:700 18px Unbounded,Onest,sans-serif;margin:0 0 14px}
-.adm .search{margin-bottom:10px;letter-spacing:.2em}
-.btn{display:block;width:100%;text-align:center;text-decoration:none;border:0;border-radius:12px;padding:13px 14px;font:700 15px Onest,system-ui,sans-serif;color:#fff;background:linear-gradient(90deg,var(--b1),var(--b2));cursor:pointer}
-.btn.alt{background:var(--surface);color:var(--ink);border:1px solid var(--line);margin-top:8px}
-.err{color:#c22;font-size:13.5px;margin:0 0 10px;min-height:1em}
 .tags{padding-top:6px}
 .tags:empty{display:none}
 .badges{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;z-index:2}
@@ -237,7 +231,6 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 </div>
 
 <dialog id="dlg"><div class="sheet" id="sheet"></div></dialog>
-<dialog id="adm" aria-label="Администратор"><div class="adm" id="admbox"></div></dialog>
 <dialog id="zm" class="zm" aria-label="Фото"><img id="zimg" alt=""></dialog>
 
 <script>
@@ -628,48 +621,6 @@ document.querySelector(".lang").addEventListener("click",e=>{
   applyLang();
 });
 
-/* ===== СКРЫТЫЙ ДОСТУП К МЕТРИКЕ: 5 нажатий на логотип + пароль ===== */
-const ADMIN_HASH = "3afa44824894daa67d3271cb952b917fc5ba5251d38db2ba8e7d700a0287e201";
-const METRIKA_URL = "https://metrika.yandex.ru/dashboard?id=113767885";
-let taps = 0, tapTimer = null, fails = 0, lockUntil = 0;
-async function sha256(t){
-  const b = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(t));
-  return [...new Uint8Array(b)].map(x=>x.toString(16).padStart(2,"0")).join("");
-}
-function openAdmin(){
-  $("admbox").innerHTML = `<h2>Администратор</h2>
-    <input class="search" id="pw" type="password" inputmode="numeric" autocomplete="off" placeholder="Пароль" aria-label="Пароль">
-    <p class="err" id="err" role="alert"></p>
-    <button class="btn" id="go">Войти</button>
-    <button class="btn alt" id="cl">Закрыть</button>`;
-  $("cl").onclick = ()=>$("adm").close();
-  const submit = async ()=>{
-    const now = Date.now();
-    if(now < lockUntil){ $("err").textContent = "Слишком много попыток. Подождите немного."; return; }
-    let ok = false;
-    try{ ok = (await sha256("molmart-admin:" + $("pw").value)) === ADMIN_HASH; }
-    catch(e){ $("err").textContent = "Проверка недоступна в этом браузере."; return; }
-    if(ok){
-      fails = 0;
-      $("admbox").innerHTML = `<h2>Администратор</h2>
-        <a class="btn" href="${METRIKA_URL}" target="_blank" rel="noopener">Открыть статистику Метрики</a>
-        <button class="btn alt" id="cl2">Закрыть</button>`;
-      $("cl2").onclick = ()=>$("adm").close();
-    } else {
-      fails++; if(fails>=5){ lockUntil = Date.now()+30000; fails = 0; }
-      $("err").textContent = "Неверный пароль."; $("pw").value = "";
-    }
-  };
-  $("go").onclick = submit;
-  $("pw").addEventListener("keydown", e=>{ if(e.key==="Enter") submit(); });
-  $("adm").showModal();
-  setTimeout(()=>$("pw").focus(), 50);
-}
-$("title").addEventListener("click", ()=>{
-  taps++; clearTimeout(tapTimer); tapTimer = setTimeout(()=>{ taps = 0; }, 2000);
-  if(taps >= 5){ taps = 0; openAdmin(); }
-});
-$("adm").addEventListener("click", e=>{ if(e.target===$("adm")) $("adm").close(); });
 
 function applyBrand(){
   const s = document.documentElement.style, c = BRAND.colors;
