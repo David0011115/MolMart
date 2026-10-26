@@ -4,6 +4,13 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
 <meta name="color-scheme" content="light only">
+<meta name="theme-color" content="#fbf4e6">
+<link rel="manifest" href="manifest.json">
+<link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="MolMart">
 <title>Холодильник — товары и цены</title>
 <link href="https://fonts.googleapis.com/css2?family=Onest:wght@400;500;700&family=Unbounded:wght@500;700&display=swap" rel="stylesheet">
 <style>
@@ -463,14 +470,50 @@ function renderChips(){
   const used = Object.keys(LABELS).filter(k=>PRODUCTS.some(p=>(p.labels||[]).includes(k)));
   $("tags").innerHTML = used.map(k=>`<button class="chip" aria-pressed="${activeTags.has(k)}" data-t="${k}">${esc(lbl(k))}</button>`).join("");
 }
+/* ===== УМНЫЙ ПОИСК: опечатки, латиница/кириллица, казахские буквы ===== */
+const TR = {"а":"a","б":"b","в":"v","г":"g","д":"d","е":"e","ё":"e","ж":"zh","з":"z","и":"i","й":"i","к":"k","л":"l","м":"m","н":"n","о":"o","п":"p","р":"r","с":"s","т":"t","у":"u","ф":"f","х":"h","ц":"ts","ч":"ch","ш":"sh","щ":"sh","ъ":"","ы":"i","ь":"","э":"e","ю":"yu","я":"ya",
+  "ә":"a","ғ":"g","қ":"k","ң":"n","ө":"o","ұ":"u","ү":"u","һ":"h","і":"i"};
+const SYN = [["kimbap","kimpab"],["gimbap","kimpab"],["hotdog","hot dog"],["xot","hot"],["burger","burger"],["chiz","cheese"],["chis","cheese"],["chiken","chicken"],["chikken","chicken"],["kuritsa","kurits"],["tuna","tunets"],["losos","semg"],["shaurma","doner"],["shaverma","doner"],["donar","doner"],["sendvich","sandwich"],["sandvich","sandwich"],["pitsa","pizza"],["pitstsa","pizza"],["peperoni","pepperoni"]];
+function skel(t){
+  t = String(t||"").toLowerCase().replace(/[«»"'().,!?/\\-]/g," ");
+  t = [...t].map(c=>TR[c]!==undefined?TR[c]:c).join("");
+  t = t.replace(/ph/g,"f").replace(/ck/g,"k").replace(/kh/g,"h").replace(/w/g,"v").replace(/q/g,"k").replace(/x/g,"ks").replace(/c(?!h)/g,"k").replace(/[yj]/g,"i").replace(/ee/g,"i").replace(/(.)\1+/g,"$1");
+  return t.replace(/\s+/g," ").trim();
+}
+const SYN_S = SYN.map(([a,b])=>[skel(a),skel(b)]);
+function lev(a,b,max){
+  if(Math.abs(a.length-b.length)>max) return max+1;
+  let prev=[...Array(b.length+1).keys()];
+  for(let i=1;i<=a.length;i++){ const cur=[i]; let best=i;
+    for(let j=1;j<=b.length;j++){ cur[j]=Math.min(prev[j]+1,cur[j-1]+1,prev[j-1]+(a[i-1]===b[j-1]?0:1)); if(cur[j]<best) best=cur[j]; }
+    if(best>max) return max+1; prev=cur; }
+  return prev[b.length];
+}
+const HAY = new Map();
+function hayOf(p){
+  if(!HAY.has(p)){ const t=skel([p.name,p.brand,p.category,CAT_KK[p.category],p.composition,p.kk&&p.kk.name,p.kk&&p.kk.composition].join(" "));
+    HAY.set(p,{t,words:t.split(" ")}); }
+  return HAY.get(p);
+}
+function tokenOk(tok,h){
+  if(h.t.includes(tok)) return true;
+  if(tok.length<4) return false;
+  const max = tok.length>=7 ? 2 : 1;
+  return h.words.some(w => lev(tok,w,max)<=max || (w.length>tok.length && lev(tok,w.slice(0,tok.length),max)<=max));
+}
+function matches(p,q){
+  let qs = skel(q); for(const [a,b] of SYN_S) qs = qs.replace(new RegExp("\\b"+a+"\\b","g"),b);
+  const h = hayOf(p);
+  return qs.split(" ").filter(Boolean).every(tok=>tokenOk(tok,h));
+}
+
 function renderGrid(anim=true){
   const q = query.trim().toLowerCase();
   const list = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>{
     if(cat!=="ALL" && p.category!==cat) return false;
     for(const t of activeTags) if(!(p.labels||[]).includes(t)) return false;
     if(!q) return true;
-    const hay = [p.name,p.composition,p.brand,p.kk&&p.kk.name,p.kk&&p.kk.composition].join(" ").toLowerCase();
-    return hay.includes(q);
+    return matches(p,q);
   });
   if(sortMode==="asc"||sortMode==="desc"){
     const k = sortMode==="asc" ? 1 : -1;
@@ -508,7 +551,14 @@ function renderSheet(i){
     </div>`;
   $("x").onclick = ()=>$("dlg").close();
 }
-function openCard(i){curIdx=i;renderSheet(i);$("dlg").showModal();}
+/* Статистика: какие товары открывают (Метрика → Отчёты → Параметры визитов; цель «card_open») */
+const METRIKA_ID = 113767885;
+function track(goal,params){ try{ if(window.ym) ym(METRIKA_ID,"reachGoal",goal,params); }catch(e){} }
+let searchTimer=null;
+function openCard(i){curIdx=i;renderSheet(i);$("dlg").showModal();
+  const p=PRODUCTS[i]; track("card_open",{"Товар":p.name,"Раздел":p.category});
+  try{ if(window.ym) ym(METRIKA_ID,"params",{"Открытые товары":{[p.category]:{[p.name]:1}}}); }catch(e){}
+}
 
 function applyLang(){
   document.documentElement.lang = lang==="kk" ? "kk" : "ru";
@@ -528,7 +578,10 @@ function applyLang(){
 
 $("catsel").addEventListener("change",e=>{cat=e.target.value;renderGrid()});
 $("tags").addEventListener("click",e=>{const b=e.target.closest(".chip");if(!b)return;const t=b.dataset.t;activeTags.has(t)?activeTags.delete(t):activeTags.add(t);renderChips();renderGrid()});
-$("q").addEventListener("input",e=>{query=e.target.value;renderGrid(false)});
+$("q").addEventListener("input",e=>{query=e.target.value;renderGrid(false);
+  clearTimeout(searchTimer); const v=query.trim();
+  if(v.length>=2) searchTimer=setTimeout(()=>{ track("search",{"Запрос":v}); try{ if(window.ym) ym(METRIKA_ID,"params",{"Поиск":{[v.toLowerCase()]:1}}); }catch(e){} },1500);
+});
 $("sort").addEventListener("change",e=>{sortMode=e.target.value;renderGrid()});
 $("sheet").addEventListener("click",e=>{const im=e.target.closest(".pic img"); if(!im) return; $("zimg").src=im.src; $("zimg").alt=im.alt; $("zm").showModal();});
 $("zm").addEventListener("click",()=>$("zm").close());
@@ -593,6 +646,7 @@ function applyBrand(){
   document.querySelector(".wm").innerHTML = `<span>${txt} ${txt}</span>`.repeat(6);
 }
 applyBrand();
+if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic"></div><div class="body"><div class="ln"></div><div class="ln s"></div><div class="ln p"></div></div></div>`.repeat(6);
 
 (async()=>{
