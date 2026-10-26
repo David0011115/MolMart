@@ -115,6 +115,12 @@ dialog::backdrop{background:rgba(5,15,18,.55)}
 .row .price{margin:0;font-size:22px}
 .close{position:sticky;top:8px;z-index:10;display:grid;place-items:center;width:44px;height:44px;padding:0;margin:8px 8px -52px auto;line-height:1;border-radius:50%;border:1px solid var(--line);background:rgba(255,253,248,.96);color:var(--ink);font-size:26px;cursor:pointer;box-shadow:0 2px 8px rgba(0,0,0,.3)}
 footer{color:var(--muted);font-size:12.5px;text-align:center;margin-top:28px}
+footer .dev{margin-top:8px;font-size:11px;opacity:.65;letter-spacing:.02em}
+/* нет в наличии */
+.card.out .pic img{filter:grayscale(1);opacity:.5}
+.card.out .name,.card.out .price{opacity:.6}
+.oos{position:absolute;z-index:3;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-6deg);background:rgba(38,42,44,.85);color:#fff;font:700 13px Onest,system-ui,sans-serif;padding:6px 12px;border-radius:8px;white-space:nowrap}
+.oosl{display:inline-block;margin:8px 0 2px;background:#3c4043;color:#fff;font-weight:700;font-size:15px;padding:5px 12px;border-radius:8px}
 /* крупнее текст */
 .name{font-size:17px;min-height:2.5em}
 .meta{font-size:14px}
@@ -276,11 +282,11 @@ const CAT_KK = {"Сэндвичи":"Сэндвичтер","Панини":"Пан
 const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
-      note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",
+      note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
       close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте"},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
-      note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",
+      note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
       close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу"}
 };
 
@@ -432,7 +438,7 @@ function applyPrices(text){
   const rows=parseCSV(text).filter(r=>r.some(x=>x.trim())); if(rows.length<2) return;
   const h=rows[0].map(x=>x.trim().toLowerCase()), col=n=>h.indexOf(n);
   const col2=(...ns)=>{for(const n of ns){const i=col(n); if(i>=0) return i;} return -1;};
-  const iN=col("товар"),iP=col2("текущая цена","цена"),iO=col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено"),iS=col("новинка с");
+  const iN=col("товар"),iP=col2("текущая цена","цена"),iO=col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено"),iS=col("новинка с"),iX=col("нет в наличии");
   if(iN<0) return; let last=null;
   for(const r of rows.slice(1)){
     const p=PRODUCTS.find(x=>x.name===(r[iN]||"").trim()); if(!p) continue;
@@ -441,6 +447,7 @@ function applyPrices(text){
     if(iL>=0) p.labels=(r[iL]||"").split(/[,;\/]/).map(x=>LABEL_BY_RU[x.trim().toLowerCase()]).filter(Boolean);
     if(hasOld(p) && !p.labels.includes("sale")) p.labels.push("sale");
     if(iS>=0) p.newSince=(r[iS]||"").trim();
+    if(iX>=0) p.out=/^(true|истина|да|1|x|х|✓|v)$/i.test((r[iX]||"").trim());
     expireNew(p);
     p.updated = iD>=0 ? (r[iD]||"").trim() : "";
     const m=iD>=0 && (r[iD]||"").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/);
@@ -462,7 +469,7 @@ function shortName(p){
 function renderPromo(){
   const box=$("promo");
   const show = cat==="ALL" && !query.trim() && !activeTags.size;
-  const items = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>!p.hidden).filter(({p})=>hasOld(p)||(p.labels||[]).some(l=>l==="sale"||l==="new"));
+  const items = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>!p.hidden&&!p.out).filter(({p})=>hasOld(p)||(p.labels||[]).some(l=>l==="sale"||l==="new"));
   if(!show || !items.length){ box.hidden=true; box.innerHTML=""; return; }
   box.hidden=false;
   box.innerHTML = `<h2>${esc(T("promo"))}</h2><div class="prow">` + items.map(({p,i})=>`
@@ -548,9 +555,10 @@ function renderGrid(anim=true){
     const isNew = o => (o.p.labels||[]).includes("new") ? 1 : 0;
     list.sort((a,b)=>isNew(b)-isNew(a));
   }
+  list.sort((a,b)=>(a.p.out?1:0)-(b.p.out?1:0)); /* «Нет в наличии» — в конец */
   $("grid").innerHTML = list.map(({p,i},n)=>`
-    <button class="card${anim?" rise":""}" data-i="${i}" style="animation-delay:${Math.min(n,8)*40}ms">
-      <div class="pic">${badges(p)}${pic(p)}</div>
+    <button class="card${anim?" rise":""}${p.out?" out":""}" data-i="${i}" style="animation-delay:${Math.min(n,8)*40}ms">
+      <div class="pic">${badges(p)}${pic(p)}${p.out?`<span class="oos">${esc(T("out"))}</span>`:""}</div>
       <div class="body">
         <div class="name" title="${esc(tr(p,"name"))}">${esc(shortName(p))}</div>
         <div class="meta">${esc([p.brand,p.weight].filter(Boolean).join(", "))}</div>
@@ -570,6 +578,7 @@ function renderSheet(i){
       <h2>${esc(tr(p,"name"))}</h2>
       <div class="meta">${esc([p.brand,catName(p.category),p.weight].filter(Boolean).join(", "))}</div>
       <div class="row">${oldTag(p)}<span class="price${p.price==null?" nop":""}">${fmt(p.price)}</span></div>
+      ${p.out?`<div class="oosl">${esc(T("out"))}</div>`:""}
       ${updTag(p,"pdate big")}
       ${block(T("comp"),tr(p,"composition"))}
       ${block(T("nutr"),tr(p,"nutrition"))}
@@ -596,7 +605,7 @@ function applyLang(){
   $("sort").setAttribute("aria-label", T("sort")); $("sortlbl").textContent = T("sort"); $("catlbl").textContent = T("cat"); $("catsel").setAttribute("aria-label", T("cat"));
   $("sort").innerHTML = [["def","sd"],["asc","sa"],["desc","sdsc"]].map(([v,k])=>`<option value="${v}"${v===sortMode?" selected":""}>${esc(T(k))}</option>`).join("");
   $("empty").textContent = T("empty");
-  $("footer").textContent = T("footer");
+  $("footer").innerHTML = esc(T("footer")) + `<div class="dev">Made by Рурак Д. · 2026</div>`;
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
   renderChips(); renderGrid(); renderShop();
