@@ -414,7 +414,8 @@ const num = v => { const d=String(v||"").replace(/[^\d]/g,""); return d ? +d : n
 function applyPrices(text){
   const rows=parseCSV(text).filter(r=>r.some(x=>x.trim())); if(rows.length<2) return;
   const h=rows[0].map(x=>x.trim().toLowerCase()), col=n=>h.indexOf(n);
-  const iN=col("товар"),iP=col("цена"),iO=col("старая цена"),iL=col("метки"),iD=col("изменено");
+  const col2=(...ns)=>{for(const n of ns){const i=col(n); if(i>=0) return i;} return -1;};
+  const iN=col("товар"),iP=col2("текущая цена","цена"),iO=col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено");
   if(iN<0) return; let last=null;
   for(const r of rows.slice(1)){
     const p=PRODUCTS.find(x=>x.name===(r[iN]||"").trim()); if(!p) continue;
