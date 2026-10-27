@@ -99,7 +99,7 @@ const PRODUCTS = [
   {name:"Квестер Биф", brand:"Bravo", category:"Сэндвичи", weight:"", price:null, labels:[], image:"img/29.webp",
    composition:"", shelfLife:"", nutrition:"",
    kk:{name:"Квестер Биф"}},
-  {name:"Донер Crispy", hidden:true /* скрыт до пересъёмки фото */, brand:"7SKFOOD", category:"Донер", weight:"", price:null, labels:[], image:"img/30.webp", composition:"Лаваш пшеничный, куриное филе, картофель фри, свежий огурец, фирменный соус, панировка.", shelfLife:"Хранить при температуре от +2 до +6 °C.",
+  {name:"Донер Crispy", brand:"7SKFOOD", category:"Донер", weight:"", price:null, labels:[], image:"img/30.webp", composition:"Лаваш пшеничный, куриное филе, картофель фри, свежий огурец, фирменный соус, панировка.", shelfLife:"Хранить при температуре от +2 до +6 °C.",
    kk:{name:"Crispy дөнер", composition:"Бидай лавашы, тауық еті филесі, фри картобы, жаңа піскен қияр, фирмалық тұздық, панировка.", shelfLife:"+2 °C-ден +6 °C-ге дейінгі температурада сақтау керек."}},
   {name:"Sushi Burger с курицей", brand:"AsGo", category:"Кимпаб", weight:"", price:null, labels:[], image:"img/31.webp", composition:"Рис, творожный сыр, нори, курица темпура, морковь, огурец, спайси соус.", nutrition:"На упаковку: 400–430 ккал, белки 22 г, жиры 16 г, углеводы 45 г.",
    kk:{name:"Тауық етімен Sushi Burger", composition:"Күріш, сүзбе ірімшігі, нори, темпурадағы тауық еті, сәбіз, қияр, спайси тұздығы.", nutrition:"Қаптамада: 400–430 ккал, ақуыз 22 г, май 16 г, көмірсу 45 г."}},
