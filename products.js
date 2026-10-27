@@ -45,9 +45,9 @@ const PRODUCTS = [
   {name:"Ролл курица терияки", brand:"", category:"Кимпаб", weight:"", price:null, labels:[], image:"img/13.webp",
    composition:"", shelfLife:"", nutrition:"",
    kk:{name:"Терияки тауықты ролл"}},
-  {name:"Онигири суши с курицей", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/14.webp",
+  {name:"Онигири AsGo с курицей", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/14.webp",
    composition:"Рис, копчёная курица, творожный сыр, сырный соус.", shelfLife:"", nutrition:"",
-   kk:{name:"Тауық етімен онигири суши", composition:"Күріш, ысталған тауық еті, сүзбе ірімшігі, ірімшік тұздығы."}},
+   kk:{name:"AsGo тауық етімен онигири", composition:"Күріш, ысталған тауық еті, сүзбе ірімшігі, ірімшік тұздығы."}},
   {name:"Онигири с тунцом", brand:"", category:"Онигири", weight:"110 г", price:null, labels:[], image:"img/15.webp",
    composition:"Рис, консервированный тунец, творожный сыр, соус, нори.", shelfLife:"", nutrition:"",
    kk:{name:"Тунецті онигири", composition:"Күріш, консервіленген тунец, сүзбе ірімшігі, тұздық, нори."}},
@@ -107,8 +107,8 @@ const PRODUCTS = [
    kk:{name:"Тауық етімен кимпаб", composition:"Тауық еті, күріш, нори, қияр, жұмыртқа, сәбіз, қырыққабат, майонез, сүзбе ірімшігі, фирмалық тұздық.", shelfLife:"+2 °C-ден +6 °C-ге дейінгі температурада сақтау керек."}},
   {name:"Онигири AsGo с тунцом", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/33.webp", composition:"Рис, тунец, творожный сыр, соус, нори.",
    kk:{name:"AsGo тунецті онигири", composition:"Күріш, тунец, сүзбе ірімшігі, тұздық, нори."}},
-  {name:"Онигири Филадельфия", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/34.webp", composition:"Рис, лосось, творожный сыр, соус, нори.",
-   kk:{name:"Филадельфия онигири", composition:"Күріш, албырт, сүзбе ірімшігі, тұздық, нори."}},
-  {name:"Онигири с крабом", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/35.webp", composition:"Рис, водоросли нори, крабовые палочки, спайси соус, творожный сыр.",
-   kk:{name:"Краб қосылған онигири", composition:"Күріш, нори балдыры, краб таяқшалары, спайси тұздығы, сүзбе ірімшігі."}}
+  {name:"Онигири AsGo Филадельфия", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/34.webp", composition:"Рис, лосось, творожный сыр, соус, нори.",
+   kk:{name:"AsGo Филадельфия онигири", composition:"Күріш, албырт, сүзбе ірімшігі, тұздық, нори."}},
+  {name:"Онигири AsGo с крабом", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/35.webp", composition:"Рис, водоросли нори, крабовые палочки, спайси соус, творожный сыр.",
+   kk:{name:"AsGo краб қосылған онигири", composition:"Күріш, нори балдыры, краб таяқшалары, спайси тұздығы, сүзбе ірімшігі."}}
 ];
