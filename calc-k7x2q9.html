@@ -29,7 +29,7 @@ table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}td{padd
 <div class="f"><label class="l" for="nr">Холодильников всего</label><input id="nr" type="number" inputmode="numeric" min="1" value="2">
 <div class="h">Первые два входят в базовую цену.</div></div>
 <div class="f"><div class="r"><input id="dm" type="checkbox"><label for="dm">Свой домен .kz</label></div></div>
-<div class="f"><label class="l" for="mo">Поддержка, сколько месяцев</label><input id="mo" type="number" inputmode="numeric" min="0" value="12"><div class="h">Поставьте 0, если поддержка не нужна.</div></div>
+<div class="f"><label class="l" for="mo">Поддержка, сколько месяцев</label><input id="mo" type="number" inputmode="numeric" min="0" value="12"><div class="h">Скидка за предоплату: от 3 месяцев 5%, от 6 месяцев 10%, от 12 месяцев 15%. Поставьте 0, если поддержка не нужна.</div></div>
 <div class="res" id="res" aria-live="polite"></div>
 <p class="n">Расчёт ориентировочный. Точную сумму согласуем после списка товаров.</p>
 </div>
@@ -45,9 +45,9 @@ function calc(){
   if(nf) rows.push(["Фото: "+nf+" × "+R.photo,nf*R.photo]);
   if(nr>2) rows.push(["Холодильники сверх двух: "+(nr-2)+" × "+R.fr,(nr-2)*R.fr]);
   if(dm) rows.push(["Свой домен .kz (год и настройка)",R.dom]);
-  const mo=v("mo");
-  const launch=rows.reduce((a,r)=>a+r[1],0), sup=R.sup+np*R.supProd;
-  $("res").innerHTML='<h2>Запуск, разово</h2><div class="big"><span>Итого</span><b>'+fmt(launch)+'</b></div><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+fmt(r[1])+'</td></tr>').join('')+'</table><h2 style="margin-top:16px">Поддержка</h2><div class="big m"><span>В месяц</span><b>'+fmt(sup)+'</b></div><div class="h">'+R.sup+' ₸ + '+R.supProd+' ₸ за товар: правки, обновления, ответы на вопросы, защита и статистика.</div>'+(mo>0?'<div class="big m"><span>За '+mo+' '+mw(mo)+'</span><b>'+fmt(sup*mo)+'</b></div><h2 style="margin-top:16px">Всего за '+mo+' '+mw(mo)+'</h2><div class="big"><span>Запуск и поддержка</span><b>'+fmt(launch+sup*mo)+'</b></div>':'');
+  const mo=v("mo"), dsc=mo>=12?15:mo>=6?10:mo>=3?5:0;
+  const launch=rows.reduce((a,r)=>a+r[1],0), sup=R.sup+np*R.supProd, spt=sup*mo*(1-dsc/100);
+  $("res").innerHTML='<h2>Запуск, разово</h2><div class="big"><span>Итого</span><b>'+fmt(launch)+'</b></div><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+fmt(r[1])+'</td></tr>').join('')+'</table><h2 style="margin-top:16px">Поддержка</h2><div class="big m"><span>В месяц</span><b>'+fmt(sup)+'</b></div><div class="h">'+R.sup+' ₸ + '+R.supProd+' ₸ за товар: правки, обновления, ответы на вопросы, защита и статистика.</div>'+(mo>0?'<div class="big m"><span>За '+mo+' '+mw(mo)+(dsc?', скидка '+dsc+'%':'')+'</span><b>'+fmt(spt)+'</b></div>'+(dsc?'<div class="h">Без скидки '+fmt(sup*mo)+', экономия '+fmt(sup*mo-spt)+'.</div>':'')+'<h2 style="margin-top:16px">Всего за '+mo+' '+mw(mo)+'</h2><div class="big"><span>Запуск и поддержка</span><b>'+fmt(launch+spt)+'</b></div>':'');
 }
 document.querySelectorAll("input").forEach(e=>e.addEventListener("input",calc)); calc();
 </script></body></html>
