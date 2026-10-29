@@ -296,6 +296,22 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .pkact{display:flex;gap:8px;flex-wrap:wrap}
 .sgbtn.alt{background:none;color:var(--accent);border:2px solid var(--accent)}
 .pknone{padding:18px 0;color:var(--muted)}
+.acts{display:flex;gap:8px;flex-wrap:wrap;margin-top:14px}
+.abtn{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:2px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
+.abtn[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.abtn:focus-visible,.cmsel select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.cmp{padding:16px 20px calc(24px + env(safe-area-inset-bottom,0px))}
+.cmp h2{font:700 19px/1.2 Unbounded,Onest,sans-serif;margin:0 0 10px}
+.cmsel{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:8px}
+.cmsel select{width:100%;min-height:44px;border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:12px;padding:8px;font:500 13px Onest,system-ui,sans-serif}
+.cmg{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);column-gap:12px;margin-top:12px}
+.cml{grid-column:1/-1;font-size:12.5px;color:var(--muted);font-weight:600;margin:14px 0 4px}
+.cmc{min-width:0;font-size:14px;line-height:1.4;overflow-wrap:anywhere}
+.cmc .pic{border-radius:12px;font-size:40px}
+.cmc .nm{font-weight:700;font-size:15px;line-height:1.25}
+.cmc .old{display:inline-block;margin:0 8px 0 0;font-size:13px}
+.cmc .price,.cmc .old+.price{display:inline-block;margin:0;font-size:16px;padding:4px 8px 4px 12px}
+.cmc .price.nop{font-size:12px}
 </style>
 <script src="config.js"></script>
 <!-- Yandex.Metrika counter -->
@@ -343,6 +359,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <dialog id="sg"></dialog>
 <dialog id="ab"></dialog>
 <dialog id="pk"></dialog>
+<dialog id="cmp"></dialog>
 
 <script src="products.js"></script>
 <script>
@@ -353,6 +370,7 @@ const LABELS = {
   hit:{ru:"Хит",kk:"Хит"},
   sale:{ru:"Акция",kk:"Акция"},
   spicy:{ru:"Острое",kk:"Ащы"},
+  fav:{ru:"♥ Избранное",kk:"♥ Таңдаулы"},   /* служебный фильтр: показывается, пока у покупателя есть избранное */
   stock:{ru:"В наличии",kk:"Қолда бар"}   /* служебный фильтр: прячет товары «Нет в наличии», показывается, пока есть такие товары */
 };
 
@@ -360,11 +378,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -483,7 +501,7 @@ function badges(p){
 function renderChips(){
   const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
   $("catsel").innerHTML = [["ALL",T("all")]].concat(cats.map(c=>[c,catName(c)])).map(([v,n])=>`<option value="${esc(v)}"${v===cat?" selected":""}>${esc(n)}</option>`).join("");
-  const used = Object.keys(LABELS).filter(k=>k==="stock" ? PRODUCTS.some(p=>p.out) : PRODUCTS.some(p=>(p.labels||[]).includes(k)));
+  const used = Object.keys(LABELS).filter(k=>k==="stock" ? PRODUCTS.some(p=>p.out) : k==="fav" ? favCount()>0 : PRODUCTS.some(p=>(p.labels||[]).includes(k)));
   $("tags").innerHTML = used.map(k=>`<button class="chip" aria-pressed="${activeTags.has(k)}" data-t="${k}">${esc(lbl(k))}</button>`).join("");
 }
 /* ===== УМНЫЙ ПОИСК: опечатки, латиница/кириллица, казахские буквы ===== */
@@ -528,7 +546,7 @@ function renderGrid(anim=true){
   const list = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>{
     if(p.hidden) return false; /* временно скрыт */
     if(cat!=="ALL" && p.category!==cat) return false;
-    for(const t of activeTags) if(t==="stock" ? p.out : !(p.labels||[]).includes(t)) return false;
+    for(const t of activeTags){ if(t==="stock"){ if(p.out) return false; } else if(t==="fav"){ if(!isFav(p)) return false; } else if(!(p.labels||[]).includes(t)) return false; }
     if(!q) return true;
     return matches(p,q);
   });
@@ -564,6 +582,7 @@ function renderSheet(i){
       <div class="row">${oldTag(p)}<span class="price${p.price==null?" nop":""}">${fmt(p.price)}</span></div>
       ${p.out?`<div class="oosl">${esc(T("out"))}</div>`:""}
       ${updTag(p,"pdate big")}
+      <div class="acts"><button class="abtn" id="fav" type="button" aria-pressed="${isFav(p)}">${esc((isFav(p)?"♥ ":"♡ ")+T(isFav(p)?"faved":"fav"))}</button><button class="abtn" id="cmpbtn" type="button">⇄ ${esc(T("cmpBtn"))}</button></div>
       ${block(T("comp"),tr(p,"composition"))}
       ${block(T("nutr"),tr(p,"nutrition"))}
       ${block(T("shelf"),tr(p,"shelfLife"))}
@@ -651,6 +670,7 @@ function applyLang(){
   renderChips(); renderGrid(); renderSuggest(); renderShop();
   if($("ab").open) openAbout();
   if($("pk").open) renderPick();
+  if($("cmp").open) renderCompare();
   if($("sg").open) openSuggest("", true);
   if($("dlg").open && curIdx>=0) renderSheet(curIdx);
 }
@@ -774,6 +794,17 @@ $("sheet").addEventListener("click",async e=>{
     $("vote").innerHTML=voteInner(p);
   }
 });
+$("sheet").addEventListener("click",e=>{
+  const fb=e.target.closest("#fav");
+  if(fb){ const p=PRODUCTS[curIdx]; if(!p) return; const on=toggleFav(p);
+    fb.setAttribute("aria-pressed",on); fb.textContent=(on?"♥ ":"♡ ")+T(on?"faved":"fav"); return; }
+  if(e.target.closest("#cmpbtn") && curIdx>=0) openCompare(curIdx);
+});
+$("cmp").addEventListener("change",e=>{
+  if(e.target.id==="cma") cmA=+e.target.value; else if(e.target.id==="cmb") cmB=+e.target.value; else return;
+  $("cmg").innerHTML=cmpGrid();
+});
+$("cmp").addEventListener("click",e=>{ if(e.target===$("cmp")) $("cmp").close(); });
 $("pickopen").addEventListener("click",openPick);
 $("pk").addEventListener("click",e=>{
   if(e.target===$("pk")){ $("pk").close(); return; }
@@ -783,6 +814,47 @@ $("pk").addEventListener("click",e=>{
   if(e.target.closest("#pkopen2")){ const i=pkCur; $("pk").close(); if(i>=0) openCard(i); }
 });
 
+/* ===== Избранное и сравнение ===== */
+function favNames(){ try{ const a=JSON.parse(localStorage.getItem("favs")||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+const isFav = p => favNames().includes(p.name);
+const favCount = () => PRODUCTS.filter(p=>!p.hidden&&isFav(p)).length;
+function toggleFav(p){
+  let a=favNames(); const on=a.includes(p.name);
+  a = on ? a.filter(n=>n!==p.name) : a.concat(p.name);
+  try{ localStorage.setItem("favs",JSON.stringify(a)); }catch(e){}
+  track(on?"fav_remove":"fav_add",{"Товар":p.name});
+  if(!favCount()) activeTags.delete("fav");
+  renderChips(); if(activeTags.has("fav")) renderGrid(false);
+  return !on;
+}
+let cmA=-1, cmB=-1;
+function cmpOptions(sel){
+  const cats=[...new Set(PRODUCTS.filter(p=>!p.hidden).map(p=>p.category))];
+  return cats.map(c=>`<optgroup label="${esc(catName(c))}">`+PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>!p.hidden&&p.category===c)
+    .map(({p,i})=>`<option value="${i}"${i===sel?" selected":""}>${esc(tr(p,"name"))}</option>`).join("")+`</optgroup>`).join("");
+}
+function cmpGrid(){
+  const a=PRODUCTS[cmA], b=PRODUCTS[cmB]; if(!a||!b) return "";
+  const row=(label,fa,fb)=>{ const x=fa(a), y=fb?fb(b):fa(b); return (x||y) ? `<div class="cml">${esc(label)}</div><div class="cmc">${x||"—"}</div><div class="cmc">${y||"—"}</div>` : ""; };
+  const txt=k=>p=>esc(tr(p,k)||"");
+  const lbs=p=>esc((p.labels||[]).map(lbl).join(", "));
+  const price=p=>`${oldTag(p)}<span class="price${p.price==null?" nop":""}">${fmt(p.price)}</span>`;
+  return `<div class="cmc"><div class="pic">${badges(a)}${pic(a)}</div><div class="nm" style="margin-top:8px">${esc(tr(a,"name"))}</div></div><div class="cmc"><div class="pic">${badges(b)}${pic(b)}</div><div class="nm" style="margin-top:8px">${esc(tr(b,"name"))}</div></div>`
+    + row(T("cmpPrice"),price) + row(T("cmpBrand"),p=>esc(p.brand||"")) + row(T("cmpW"),p=>esc(p.weight||"")) + row(T("cmpLbl"),lbs)
+    + row(T("comp"),txt("composition")) + row(T("nutr"),txt("nutrition")) + row(T("shelf"),txt("shelfLife"));
+}
+function renderCompare(){
+  $("cmp").setAttribute("aria-label",T("cmpTitle"));
+  $("cmp").innerHTML=`<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="cmx"><span>${esc(T("close"))}</span><b>×</b></button></div>
+    <div class="cmp"><h2>${esc(T("cmpTitle"))}</h2><div class="cmsel"><select id="cma" aria-label="${esc(T("cmpA"))}">${cmpOptions(cmA)}</select><select id="cmb" aria-label="${esc(T("cmpB"))}">${cmpOptions(cmB)}</select></div><div class="cmg" id="cmg">${cmpGrid()}</div></div>`;
+  $("cmx").onclick=()=>$("cmp").close();
+}
+function openCompare(i){
+  cmA=i; const c=PRODUCTS[i].category;
+  const pick=PRODUCTS.map((p,k)=>({p,k})).filter(({p,k})=>k!==i&&!p.hidden);
+  const o=pick.find(({p})=>p.category===c&&!p.out)||pick.find(({p})=>p.category===c)||pick[0]; cmB=o?o.k:i;
+  renderCompare(); if(!$("cmp").open){ $("cmp").showModal(); track("compare_open",{"Товар":PRODUCTS[i].name}); }
+}
 /* ===== Переключатель темы: по умолчанию как на телефоне, кнопка включает принудительно ===== */
 const THEME_META = ["#fbf4e6","#0c1a1f"];
 function themeIsDark(){ const t=document.documentElement.getAttribute("data-theme"); return t ? t==="dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches); }
