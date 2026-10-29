@@ -76,8 +76,9 @@ h1{font:700 clamp(17px,5vw,22px)/1.1 Unbounded,Onest,system-ui,sans-serif;color:
 .lb:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .abbtn{position:absolute;top:12px;left:12px;display:grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #0b7a8a;border-radius:50%;background:#fff;color:#0b5f6b;font:700 20px Onest,system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(11,122,138,.3)}
 .abbtn[hidden]{display:none}
-.thbtn{position:absolute;top:12px;left:12px;display:grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #0b7a8a;border-radius:50%;background:#fff;color:#0b5f6b;cursor:pointer;box-shadow:0 3px 10px rgba(11,122,138,.3)}
-.abbtn:not([hidden])~.thbtn{left:68px}
+.thbtn{flex:none;display:grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #0b7a8a;border-radius:50%;background:#fff;color:#0b5f6b;cursor:pointer;box-shadow:0 3px 10px rgba(11,122,138,.3)}
+.tools{position:absolute;top:12px;right:12px;display:flex;align-items:center;gap:8px}
+.tools .lang{position:static}
 .thbtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .thbtn svg{display:block}
 .abbtn:focus-visible,.abgo:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
@@ -318,8 +319,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <div class="wrap">
   <header>
     <button class="abbtn" id="abopen" type="button" hidden>i</button>
-    <button class="thbtn" id="thbtn" type="button"></button>
-    <div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div>
+    <div class="tools"><button class="thbtn" id="thbtn" type="button"></button><div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div></div>
     <h1 class="brand" id="title" aria-label="MolMart">Mol<b>Mart</b></h1>
     <p class="sub" id="subtitle"></p>
     <p class="upd" id="upd" hidden></p>
