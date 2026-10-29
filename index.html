@@ -72,6 +72,11 @@ h1{font:700 clamp(17px,5vw,22px)/1.1 Unbounded,Onest,system-ui,sans-serif;color:
 .lb{border:0;background:transparent;color:#0b5f6b;font:700 15px Onest,system-ui,sans-serif;padding:9px 16px;cursor:pointer;min-width:52px}
 .lb[aria-pressed="true"]{background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff}
 .lb:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
+.abbtn{position:absolute;top:12px;left:12px;display:grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #0b7a8a;border-radius:50%;background:#fff;color:#0b5f6b;font:700 20px Onest,system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(11,122,138,.3)}
+.abbtn[hidden]{display:none}
+.abbtn:focus-visible,.abgo:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.abx{padding:18px 20px 24px}.abx h2{margin:0 0 10px;font-size:20px}.abx p{margin:0 0 14px;line-height:1.55}
+.abgo{display:inline-block;text-decoration:none;border-radius:999px;padding:12px 20px;background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff;font:700 15px Onest,system-ui,sans-serif}
 .upd{margin:2px 0 0;font-size:12.5px;color:var(--muted)}
 .tags{padding-top:6px}
 .tags:empty{display:none}
@@ -252,6 +257,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <div class="wm" aria-hidden="true"><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span></div>
 <div class="wrap">
   <header>
+    <button class="abbtn" id="abopen" type="button" hidden>i</button>
     <div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div>
     <h1 class="brand" id="title" aria-label="MolMart">Mol<b>Mart</b></h1>
     <p class="sub" id="subtitle"></p>
@@ -273,6 +279,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <dialog id="dlg"><div class="sheet" id="sheet"></div></dialog>
 <dialog id="zm" class="zm" aria-label="Фото"><img id="zimg" alt=""></dialog>
 <dialog id="sg"></dialog>
+<dialog id="ab"></dialog>
 
 <script src="products.js"></script>
 <script>
@@ -290,11 +297,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото"},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же"},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау"}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын"}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -509,6 +516,16 @@ function openCard(i){curIdx=i;renderSheet(i);$("dlg").showModal();
   try{ if(window.ym) ym(METRIKA_ID,"params",{"Открытые товары":{[p.category]:{[p.name]:1}}}); }catch(e){}
 }
 
+const AB_ON = ()=> typeof DEV_CONTACT==="string" && DEV_CONTACT.trim()!=="";
+function abLink(){ const c=DEV_CONTACT.trim(); return /^https?:/i.test(c) ? c : "https://t.me/"+c.replace(/^@/,""); }
+function openAbout(){
+  $("ab").setAttribute("aria-label", T("abTitle"));
+  $("ab").innerHTML = `<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="abx"><span>${esc(T("close"))}</span><b>×</b></button></div>
+    <div class="abx"><h2>${esc(T("abTitle"))}</h2><p>${esc(T("abText"))}</p><p>${esc(T("abText2"))}</p><a class="abgo" id="abgo" href="${esc(abLink())}" target="_blank" rel="noopener">${esc(T("abGo"))}</a></div>`;
+  $("abx").onclick = ()=>$("ab").close();
+  $("abgo").onclick = ()=>track("about_contact");
+  if(!$("ab").open){ $("ab").showModal(); track("about_open"); }
+}
 function applyLang(){
   document.documentElement.lang = lang==="kk" ? "kk" : "ru";
   document.querySelectorAll(".lb").forEach(b=>b.setAttribute("aria-pressed", b.dataset.l===lang));
@@ -521,7 +538,9 @@ function applyLang(){
   $("footer").innerHTML = esc(T("footer")) + `<div class="dev">Made by Рурак Д. · 2026</div>`;
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
+  $("abopen").hidden = !AB_ON(); $("abopen").setAttribute("aria-label", T("abBtn")); $("abopen").title = T("abBtn");
   renderChips(); renderGrid(); renderSuggest(); renderShop();
+  if($("ab").open) openAbout();
   if($("sg").open) openSuggest("", true);
   if($("dlg").open && curIdx>=0) renderSheet(curIdx);
 }
@@ -610,6 +629,7 @@ async function sgSubmit(e){
   $("sgform").innerHTML = `<p class="sgok">✓ ${esc(T("sgThanks"))}</p><button class="sgbtn" type="button" id="sgdone">${esc(T("close"))}</button>`;
   $("sgdone").onclick = ()=>$("sg").close();
 }
+$("abopen").addEventListener("click",()=>openAbout());
 $("suggest").addEventListener("click",e=>{ if(e.target.closest("#sgopen")) openSuggest(""); });
 $("empty").addEventListener("click",e=>{ if(e.target.closest("#sgq")) openSuggest(query.trim()); });
 $("sg").addEventListener("click",e=>{
