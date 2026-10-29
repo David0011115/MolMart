@@ -203,6 +203,23 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 @media (prefers-reduced-motion:reduce){.brand,.brand b,.old+.price::after,.blobs i{animation:none}}
 .pdate{font-size:11.5px;color:var(--muted);margin-top:4px}
 .pdate.big{font-size:13px;margin-top:6px}
+/* форма «Предложить товар» (видна, если в config.js задан SUGGEST_URL) */
+.suggest{margin-top:24px;background:var(--surface);border:1px dashed var(--accent);border-radius:14px;padding:14px 16px;font-size:14px;line-height:1.5}
+.suggest h2{font:700 15px Unbounded,Onest,sans-serif;margin:0 0 6px}
+.suggest p{margin:0 0 12px;color:var(--muted)}
+.sgbtn{border:0;border-radius:999px;padding:12px 20px;background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff;font:700 15px Onest,system-ui,sans-serif;cursor:pointer;min-height:44px}
+.sgbtn:disabled{opacity:.6;cursor:default}
+.sgbtn:focus-visible,.sgf input:focus-visible,.lnk:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sgf{padding:16px 20px calc(20px + env(safe-area-inset-bottom,0px))}
+.sgf h2{font:700 19px/1.2 Unbounded,Onest,sans-serif;margin:0 0 6px}
+.sgf .sgn{font-size:12.5px;color:var(--muted);margin:0 0 4px}
+.sgf label{display:block;font-size:13px;color:var(--muted);margin-top:12px}
+.sgf input{display:block;width:100%;box-sizing:border-box;margin-top:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px 14px;font:16px Onest,system-ui,sans-serif}
+.sgh{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
+.sgmsg{min-height:20px;font-size:13px;margin:10px 0 6px;color:var(--muted)}
+.sgmsg.err{color:#d93a3a}
+.sgok{font-size:16px;text-align:center;padding:28px 0 12px}
+.lnk{all:unset;color:var(--accent);text-decoration:underline;cursor:pointer;font-weight:600}
 </style>
 <script src="config.js"></script>
 <!-- Yandex.Metrika counter -->
@@ -238,12 +255,14 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
   <section class="promo" id="promo" hidden></section>
   <main class="grid" id="grid"></main>
   <div class="empty" id="empty" hidden></div>
+  <section class="suggest" id="suggest" hidden></section>
   <section class="shop" id="shop" hidden></section>
   <footer id="footer"></footer>
 </div>
 
 <dialog id="dlg"><div class="sheet" id="sheet"></div></dialog>
 <dialog id="zm" class="zm" aria-label="Фото"><img id="zimg" alt=""></dialog>
+<dialog id="sg"></dialog>
 
 <script src="products.js"></script>
 <script>
@@ -260,11 +279,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте"},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram, если хотите ответ",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар"},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу"}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Жауап алғыңыз келсе, телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну"}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -487,11 +506,12 @@ function applyLang(){
   $("q").placeholder = T("search"); $("q").setAttribute("aria-label", T("search"));
   $("sort").setAttribute("aria-label", T("sort")); $("sortlbl").textContent = T("sort"); $("catlbl").textContent = T("cat"); $("catsel").setAttribute("aria-label", T("cat"));
   $("sort").innerHTML = [["def","sd"],["asc","sa"],["desc","sdsc"]].map(([v,k])=>`<option value="${v}"${v===sortMode?" selected":""}>${esc(T(k))}</option>`).join("");
-  $("empty").textContent = T("empty");
+  $("empty").innerHTML = esc(T("empty")) + (SG_ON() ? ` <button class="lnk" id="sgq" type="button">${esc(T("sgEmptyBtn"))}</button>` : "");
   $("footer").innerHTML = esc(T("footer")) + `<div class="dev">Made by Рурак Д. · 2026</div>`;
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
-  renderChips(); renderGrid(); renderShop();
+  renderChips(); renderGrid(); renderSuggest(); renderShop();
+  if($("sg").open) openSuggest($("sgname")?$("sgname").value:"", true);
   if($("dlg").open && curIdx>=0) renderSheet(curIdx);
 }
 
@@ -507,6 +527,61 @@ $("zm").addEventListener("click",()=>$("zm").close());
 $("grid").addEventListener("click",e=>{const c=e.target.closest(".card");if(c)openCard(+c.dataset.i)});
 $("promo").addEventListener("click",e=>{const c=e.target.closest(".pc");if(c)openCard(+c.dataset.i)});
 $("dlg").addEventListener("click",e=>{if(e.target===$("dlg"))$("dlg").close()});
+/* ===== Форма «Предложить товар» =====
+   Включается, если в config.js задан SUGGEST_URL (адрес веб-приложения Apps Script, см. Предложения.gs). Пусто = форма скрыта.
+   Защита от спама без капчи: скрытое поле-ловушка, не чаще 1 раза в минуту и 3 раз в сутки с устройства, остальное проверяет скрипт. */
+const SG_ON = () => typeof SUGGEST_URL!=="undefined" && !!SUGGEST_URL;
+let sgOpened = 0;
+function renderSuggest(){
+  const box=$("suggest");
+  if(!SG_ON()){ box.hidden=true; box.innerHTML=""; return; }
+  box.hidden=false;
+  box.innerHTML = `<h2>${esc(T("sgTitle"))}</h2><p>${esc(T("sgText"))}</p><button class="sgbtn" id="sgopen" type="button">${esc(T("sgBtn"))}</button>`;
+}
+function sgLog(){ try{ const now=Date.now(); return JSON.parse(localStorage.getItem("sg_log")||"[]").filter(t=>now-t<86400000); }catch(e){ return []; } }
+function sgAllowed(){ const l=sgLog(); return l.length<3 && !(l.length && Date.now()-l[l.length-1]<60000); }
+function sgMark(){ try{ const l=sgLog(); l.push(Date.now()); localStorage.setItem("sg_log",JSON.stringify(l)); }catch(e){} }
+function openSuggest(prefill, keepTime){
+  if(!keepTime) sgOpened=Date.now();
+  $("sg").setAttribute("aria-label", T("sgBtn"));
+  $("sg").innerHTML = `
+    <div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="sgx"><span>${esc(T("close"))}</span><b>×</b></button></div>
+    <form class="sgf" id="sgform" novalidate>
+      <h2>${esc(T("sgBtn"))}</h2>
+      <p class="sgn">${esc(T("sgNote"))}</p>
+      <label>${esc(T("sgName"))}<input id="sgname" maxlength="80" autocomplete="off" placeholder="${esc(T("sgNamePh"))}" value="${esc(prefill||"")}"></label>
+      <label>${esc(T("sgContact"))}<input id="sgcontact" maxlength="60" autocomplete="off" placeholder="${esc(T("sgContactPh"))}"></label>
+      <div class="sgh" aria-hidden="true"><label>Website<input id="sgweb" tabindex="-1" autocomplete="off"></label></div>
+      <p class="sgmsg" id="sgmsg" role="status" aria-live="polite"></p>
+      <button class="sgbtn" id="sgsend" type="submit">${esc(T("sgSend"))}</button>
+    </form>`;
+  $("sgx").onclick = ()=>$("sg").close();
+  if(!$("sg").open){ $("sg").showModal(); track("suggest_open"); }
+}
+async function sgSubmit(e){
+  e.preventDefault();
+  const name=$("sgname").value.trim(), contact=$("sgcontact").value.trim(), msg=$("sgmsg"), btn=$("sgsend");
+  const say=(k,err)=>{ msg.textContent=T(k); msg.className="sgmsg"+(err?" err":""); };
+  if(name.length<3){ say("sgShort",1); $("sgname").focus(); return; }
+  if(!sgAllowed()){ say("sgWait",1); return; }
+  btn.disabled=true; say("sgSending");
+  let ok=true;
+  if(!$("sgweb").value){   /* поле-ловушку заполнил бот: делаем вид, что всё хорошо, но ничего не отправляем */
+    try{
+      await fetch(SUGGEST_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({name,contact,lang,ms:Date.now()-sgOpened})});
+    }catch(err){ ok=false; }
+  }
+  if(!ok){ say("sgErr",1); btn.disabled=false; return; }
+  sgMark(); track("suggest_send");
+  $("sgform").innerHTML = `<p class="sgok">✓ ${esc(T("sgThanks"))}</p><button class="sgbtn" type="button" id="sgdone">${esc(T("close"))}</button>`;
+  $("sgdone").onclick = ()=>$("sg").close();
+}
+$("suggest").addEventListener("click",e=>{ if(e.target.closest("#sgopen")) openSuggest(""); });
+$("empty").addEventListener("click",e=>{ if(e.target.closest("#sgq")) openSuggest(query.trim()); });
+$("sg").addEventListener("submit",e=>{ if(e.target.id==="sgform") sgSubmit(e); });
+$("sg").addEventListener("click",e=>{ if(e.target===$("sg")) $("sg").close(); });
+
 document.querySelector(".lang").addEventListener("click",e=>{
   const b=e.target.closest(".lb"); if(!b) return;
   lang=b.dataset.l; try{localStorage.setItem("lang",lang)}catch(err){}
