@@ -282,7 +282,8 @@ const LABELS = {
   new:{ru:"Новинка",kk:"Жаңа"},
   hit:{ru:"Хит",kk:"Хит"},
   sale:{ru:"Акция",kk:"Акция"},
-  spicy:{ru:"Острое",kk:"Ащы"}
+  spicy:{ru:"Острое",kk:"Ащы"},
+  stock:{ru:"В наличии",kk:"Қолда бар"}   /* служебный фильтр: прячет товары «Нет в наличии», показывается, пока есть такие товары */
 };
 
 const STR = {
@@ -412,7 +413,7 @@ function badges(p){
 function renderChips(){
   const cats = [...new Set(PRODUCTS.map(p=>p.category).filter(Boolean))];
   $("catsel").innerHTML = [["ALL",T("all")]].concat(cats.map(c=>[c,catName(c)])).map(([v,n])=>`<option value="${esc(v)}"${v===cat?" selected":""}>${esc(n)}</option>`).join("");
-  const used = Object.keys(LABELS).filter(k=>PRODUCTS.some(p=>(p.labels||[]).includes(k)));
+  const used = Object.keys(LABELS).filter(k=>k==="stock" ? PRODUCTS.some(p=>p.out) : PRODUCTS.some(p=>(p.labels||[]).includes(k)));
   $("tags").innerHTML = used.map(k=>`<button class="chip" aria-pressed="${activeTags.has(k)}" data-t="${k}">${esc(lbl(k))}</button>`).join("");
 }
 /* ===== УМНЫЙ ПОИСК: опечатки, латиница/кириллица, казахские буквы ===== */
@@ -457,7 +458,7 @@ function renderGrid(anim=true){
   const list = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>{
     if(p.hidden) return false; /* временно скрыт */
     if(cat!=="ALL" && p.category!==cat) return false;
-    for(const t of activeTags) if(!(p.labels||[]).includes(t)) return false;
+    for(const t of activeTags) if(t==="stock" ? p.out : !(p.labels||[]).includes(t)) return false;
     if(!q) return true;
     return matches(p,q);
   });
