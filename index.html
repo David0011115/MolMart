@@ -293,8 +293,9 @@ const updTag = (p,cls) => (p.updated && p.price!=null) ? `<div class="${cls}">${
 const oldTag = p => hasOld(p) ? `<span class="old">${fmt(p.oldPrice)}</span>` : "";
 
 /* ===== ЗАГРУЗКА prices.csv =====
-   Колонки: Раздел, Товар, Бренд, Цена, Старая цена, Метки, Изменено, Новинка с.
-   Товар ищется по точному названию. Метки через запятую: Халал, Острое, Новинка, Хит, Акция.
+   Колонки: Раздел, Товар, Бренд, Цена, Акционная цена, Акция до, Метки, Изменено, Новинка с, Нет в наличии.
+   Акция действует, если 0 < Акционная цена < Цена и (Акция до пусто или сегодня по Алматы ≤ Акция до). Метка «Акция» ставится автоматически.
+   Старый формат (Текущая цена, Цена до скидки) тоже читается. Товар ищется по точному названию. Метки через запятую: Халал, Острое, Новинка, Хит, Акция.
    Если файл не загрузился, остаются значения из кода. */
 function parseCSV(t){
   t=t.replace(/^﻿/,""); const rows=[]; let row=[],f="",q=false;
@@ -311,13 +312,24 @@ function applyPrices(text){
   const rows=parseCSV(text).filter(r=>r.some(x=>x.trim())); if(rows.length<2) return;
   const h=rows[0].map(x=>x.trim().toLowerCase()), col=n=>h.indexOf(n);
   const col2=(...ns)=>{for(const n of ns){const i=col(n); if(i>=0) return i;} return -1;};
-  const iN=col("товар"),iP=col2("текущая цена","цена"),iO=col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено"),iS=col("новинка с"),iX=col("нет в наличии");
+  /* формат определяется по заголовкам: новый (есть «Акционная цена») или старый (есть «Текущая цена») */
+  const iA=col("акционная цена"), iU=col("акция до"), newFmt=iA>=0;
+  const iN=col("товар"),iP=newFmt?col("цена"):col2("текущая цена","цена"),iO=newFmt?-1:col2("цена до скидки","старая цена"),iL=col("метки"),iD=col("изменено"),iS=col("новинка с"),iX=col("нет в наличии");
   if(iN<0) return; let last=null;
+  /* «сегодня» по Алматы в виде гггг-мм-дд; «Акция до» (дд.мм.гггг) включительно */
+  const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Almaty"}).format(new Date());
+  const untilISO=s=>{const m=String(s||"").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); return m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:"";};
   for(const r of rows.slice(1)){
     const p=PRODUCTS.find(x=>x.name===(r[iN]||"").trim()); if(!p) continue;
     if(iP>=0) p.price=num(r[iP]);
-    if(iO>=0) p.oldPrice=num(r[iO]);
+    if(newFmt){
+      const ap=num(r[iA]), u=iU>=0?untilISO(r[iU]):"";
+      const on = ap>0 && p.price!=null && ap<p.price && (!u || today<=u);
+      p.oldPrice = on ? p.price : null;
+      if(on) p.price = ap;
+    } else if(iO>=0) p.oldPrice=num(r[iO]);
     if(iL>=0) p.labels=(r[iL]||"").split(/[,;\/]/).map(x=>LABEL_BY_RU[x.trim().toLowerCase()]).filter(Boolean);
+    if(newFmt) p.labels=p.labels.filter(l=>l!=="sale"); /* «Акция» только автоматическая */
     if(hasOld(p) && !p.labels.includes("sale")) p.labels.push("sale");
     if(iS>=0) p.newSince=(r[iS]||"").trim();
     if(iX>=0) p.out=/^(true|истина|да|1|x|х|✓|v)$/i.test((r[iX]||"").trim());
