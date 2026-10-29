@@ -110,5 +110,14 @@ const PRODUCTS = [
   {name:"Онигири AsGo Филадельфия", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/34.webp", composition:"Рис, лосось, творожный сыр, соус, нори.",
    kk:{name:"AsGo Филадельфия онигири", composition:"Күріш, албырт, сүзбе ірімшігі, тұздық, нори."}},
   {name:"Онигири AsGo с крабом", brand:"AsGo", category:"Онигири", weight:"", price:null, labels:[], image:"img/35.webp", composition:"Рис, водоросли нори, крабовые палочки, спайси соус, творожный сыр.",
-   kk:{name:"AsGo краб қосылған онигири", composition:"Күріш, нори балдыры, краб таяқшалары, спайси тұздығы, сүзбе ірімшігі."}}
+   kk:{name:"AsGo краб қосылған онигири", composition:"Күріш, нори балдыры, краб таяқшалары, спайси тұздығы, сүзбе ірімшігі."}},
+  {name:"Честер бургер", brand:"Bravo", category:"Бургеры", weight:"", price:null, labels:["halal"], image:"img/39.webp",
+   composition:"", shelfLife:"", nutrition:"",
+   kk:{name:"Честер бургер"}},
+  {name:"Сэндвич Клаб", brand:"Bravo", category:"Сэндвичи", weight:"160 г", price:null, labels:["halal"], image:"img/40.webp",
+   composition:"Копчёная курица, тосты, огурец, листья салата, майонез, кетчуп.", shelfLife:"", nutrition:"",
+   kk:{name:"Клаб сэндвичі", composition:"Ысталған тауық еті, тосты, қияр, салат жапырақтары, майонез, кетчуп."}},
+  {name:"Ролл с копчёной курицей", brand:"Bravo", category:"Донер", weight:"200 г", price:null, labels:[], image:"img/41.webp",
+   composition:"Лаваш, копчёный куриный рулет, пекинская капуста, соус.", shelfLife:"", nutrition:"На 100 г: белки 7,94 г, жиры 11,04 г, углеводы 22,88 г, 226 ккал",
+   kk:{name:"Ысталған тауықты ролл", composition:"Лаваш, ысталған тауық етінен рулет, пекин қырыққабат, соус.", nutrition:"100 г-да: ақуыз 7,94 г, май 11,04 г, көмірсу 22,88 г, 226 ккал"}}
 ];
