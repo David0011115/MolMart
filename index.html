@@ -215,11 +215,21 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .sgf .sgn{font-size:12.5px;color:var(--muted);margin:0 0 4px}
 .sgf label{display:block;font-size:13px;color:var(--muted);margin-top:12px}
 .sgf input{display:block;width:100%;box-sizing:border-box;margin-top:4px;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px 14px;font:16px Onest,system-ui,sans-serif}
+.sgf input[hidden]{display:none}
 .sgh{position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden}
 .sgmsg{min-height:20px;font-size:13px;margin:10px 0 6px;color:var(--muted)}
 .sgmsg.err{color:#d93a3a}
 .sgok{font-size:16px;text-align:center;padding:28px 0 12px}
 .lnk{all:unset;color:var(--accent);text-decoration:underline;cursor:pointer;font-weight:600}
+.sgph{margin-top:12px}
+.sgph>span{display:block;font-size:13px;color:var(--muted)}
+.sgthumbs{display:flex;gap:8px;flex-wrap:wrap;margin-top:6px}
+.sgth{position:relative;width:76px;height:76px;border-radius:12px;overflow:hidden;border:1px solid var(--line);background:var(--bg)}
+.sgth img{width:100%;height:100%;object-fit:cover;display:block}
+.sgth button{position:absolute;top:3px;right:3px;width:26px;height:26px;border:0;border-radius:50%;background:rgba(0,0,0,.65);color:#fff;font:700 16px/1 Onest,system-ui,sans-serif;cursor:pointer;padding:0}
+.sgadd{width:76px;height:76px;border:1px dashed var(--accent);border-radius:12px;background:var(--bg);color:var(--accent);font:600 13px/1.2 Onest,system-ui,sans-serif;cursor:pointer;padding:4px}
+.sgadd:focus-visible,.sgth button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.sgf .sgph-n{font-size:12px;color:var(--muted);margin:6px 0 0}
 </style>
 <script src="config.js"></script>
 <!-- Yandex.Metrika counter -->
@@ -279,11 +289,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram, если хотите ответ",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар"},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото"},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Жауап алғыңыз келсе, телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну"}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау"}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -511,7 +521,7 @@ function applyLang(){
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
   renderChips(); renderGrid(); renderSuggest(); renderShop();
-  if($("sg").open) openSuggest($("sgname")?$("sgname").value:"", true);
+  if($("sg").open) openSuggest("", true);
   if($("dlg").open && curIdx>=0) renderSheet(curIdx);
 }
 
@@ -531,7 +541,7 @@ $("dlg").addEventListener("click",e=>{if(e.target===$("dlg"))$("dlg").close()});
    Включается, если в config.js задан SUGGEST_URL (адрес веб-приложения Apps Script, см. Предложения.gs). Пусто = форма скрыта.
    Защита от спама без капчи: скрытое поле-ловушка, не чаще 1 раза в минуту и 3 раз в сутки с устройства, остальное проверяет скрипт. */
 const SG_ON = () => typeof SUGGEST_URL!=="undefined" && !!SUGGEST_URL;
-let sgOpened = 0;
+let sgOpened = 0, sgImgs = [];
 function renderSuggest(){
   const box=$("suggest");
   if(!SG_ON()){ box.hidden=true; box.innerHTML=""; return; }
@@ -541,8 +551,26 @@ function renderSuggest(){
 function sgLog(){ try{ const now=Date.now(); return JSON.parse(localStorage.getItem("sg_log")||"[]").filter(t=>now-t<86400000); }catch(e){ return []; } }
 function sgAllowed(){ const l=sgLog(); return l.length<3 && !(l.length && Date.now()-l[l.length-1]<60000); }
 function sgMark(){ try{ const l=sgLog(); l.push(Date.now()); localStorage.setItem("sg_log",JSON.stringify(l)); }catch(e){} }
-function openSuggest(prefill, keepTime){
-  if(!keepTime) sgOpened=Date.now();
+/* Фото сжимаем в браузере до 1000 px по длинной стороне (JPEG), чтобы отправка была быстрой и лёгкой */
+function sgResize(file){
+  return new Promise((ok,fail)=>{
+    const url=URL.createObjectURL(file), im=new Image();
+    im.onload=()=>{ const k=Math.min(1,1000/Math.max(im.width,im.height)), c=document.createElement("canvas");
+      c.width=Math.max(1,Math.round(im.width*k)); c.height=Math.max(1,Math.round(im.height*k));
+      c.getContext("2d").drawImage(im,0,0,c.width,c.height); URL.revokeObjectURL(url); ok(c.toDataURL("image/jpeg",.8)); };
+    im.onerror=()=>{ URL.revokeObjectURL(url); fail(new Error("img")); };
+    im.src=url;
+  });
+}
+function sgThumbs(){
+  $("sgthumbs").innerHTML = sgImgs.map((d,i)=>`<div class="sgth"><img src="${d}" alt=""><button type="button" data-rm="${i}" aria-label="${esc(T("sgRemove"))}">×</button></div>`).join("")
+    + (sgImgs.length<3 ? `<button class="sgadd" type="button" id="sgadd">${esc(T("sgAddPhoto"))}</button>` : "");
+}
+function openSuggest(prefill, keep){
+  if(keep && !$("sgname")) return;   /* экран «Спасибо» не перерисовываем при смене языка */
+  let where="", contact="";
+  if(keep && $("sgname")){ prefill=$("sgname").value; where=$("sgwhere").value; contact=$("sgcontact").value; }
+  else { sgOpened=Date.now(); sgImgs=[]; }
   $("sg").setAttribute("aria-label", T("sgBtn"));
   $("sg").innerHTML = `
     <div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="sgx"><span>${esc(T("close"))}</span><b>×</b></button></div>
@@ -550,35 +578,49 @@ function openSuggest(prefill, keepTime){
       <h2>${esc(T("sgBtn"))}</h2>
       <p class="sgn">${esc(T("sgNote"))}</p>
       <label>${esc(T("sgName"))}<input id="sgname" maxlength="80" autocomplete="off" placeholder="${esc(T("sgNamePh"))}" value="${esc(prefill||"")}"></label>
-      <label>${esc(T("sgContact"))}<input id="sgcontact" maxlength="60" autocomplete="off" placeholder="${esc(T("sgContactPh"))}"></label>
+      <label>${esc(T("sgWhere"))}<input id="sgwhere" maxlength="120" autocomplete="off" placeholder="${esc(T("sgWherePh"))}" value="${esc(where)}"></label>
+      <div class="sgph"><span>${esc(T("sgPhoto"))}</span><div class="sgthumbs" id="sgthumbs"></div><input id="sgfile" type="file" accept="image/*" multiple hidden><p class="sgph-n">${esc(T("sgPhotoNote"))}</p></div>
+      <label>${esc(T("sgContact"))}<input id="sgcontact" maxlength="60" autocomplete="off" placeholder="${esc(T("sgContactPh"))}" value="${esc(contact)}"></label>
       <div class="sgh" aria-hidden="true"><label>Website<input id="sgweb" tabindex="-1" autocomplete="off"></label></div>
       <p class="sgmsg" id="sgmsg" role="status" aria-live="polite"></p>
       <button class="sgbtn" id="sgsend" type="submit">${esc(T("sgSend"))}</button>
     </form>`;
+  sgThumbs();
   $("sgx").onclick = ()=>$("sg").close();
   if(!$("sg").open){ $("sg").showModal(); track("suggest_open"); }
 }
 async function sgSubmit(e){
   e.preventDefault();
-  const name=$("sgname").value.trim(), contact=$("sgcontact").value.trim(), msg=$("sgmsg"), btn=$("sgsend");
+  const name=$("sgname").value.trim(), where=$("sgwhere").value.trim(), contact=$("sgcontact").value.trim(), msg=$("sgmsg"), btn=$("sgsend");
   const say=(k,err)=>{ msg.textContent=T(k); msg.className="sgmsg"+(err?" err":""); };
   if(name.length<3){ say("sgShort",1); $("sgname").focus(); return; }
   if(!sgAllowed()){ say("sgWait",1); return; }
   btn.disabled=true; say("sgSending");
   let ok=true;
   if(!$("sgweb").value){   /* поле-ловушку заполнил бот: делаем вид, что всё хорошо, но ничего не отправляем */
+    const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),40000);
     try{
-      await fetch(SUGGEST_URL,{method:"POST",mode:"no-cors",headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify({name,contact,lang,ms:Date.now()-sgOpened})});
-    }catch(err){ ok=false; }
+      await fetch(SUGGEST_URL,{method:"POST",mode:"no-cors",signal:ctl.signal,headers:{"Content-Type":"text/plain;charset=utf-8"},
+        body:JSON.stringify({name,where,contact,lang,images:sgImgs.map(d=>d.replace(/^data:image\/jpeg;base64,/,"")),ms:Date.now()-sgOpened})});
+    }catch(err){ ok=false; } finally{ clearTimeout(to); }
   }
   if(!ok){ say("sgErr",1); btn.disabled=false; return; }
-  sgMark(); track("suggest_send");
+  sgMark(); track("suggest_send",{"Фото":sgImgs.length}); sgImgs=[];
   $("sgform").innerHTML = `<p class="sgok">✓ ${esc(T("sgThanks"))}</p><button class="sgbtn" type="button" id="sgdone">${esc(T("close"))}</button>`;
   $("sgdone").onclick = ()=>$("sg").close();
 }
 $("suggest").addEventListener("click",e=>{ if(e.target.closest("#sgopen")) openSuggest(""); });
 $("empty").addEventListener("click",e=>{ if(e.target.closest("#sgq")) openSuggest(query.trim()); });
+$("sg").addEventListener("click",e=>{
+  if(e.target.closest("#sgadd")) $("sgfile").click();
+  const rm=e.target.closest("[data-rm]"); if(rm){ sgImgs.splice(+rm.dataset.rm,1); sgThumbs(); }
+});
+$("sg").addEventListener("change",async e=>{
+  if(e.target.id!=="sgfile") return;
+  const files=[...e.target.files].slice(0,3-sgImgs.length); e.target.value="";
+  for(const f of files){ try{ sgImgs.push(await sgResize(f)); }catch(err){ const m=$("sgmsg"); if(m){ m.textContent=T("sgPhotoErr"); m.className="sgmsg err"; } } }
+  sgThumbs();
+});
 $("sg").addEventListener("submit",e=>{ if(e.target.id==="sgform") sgSubmit(e); });
 $("sg").addEventListener("click",e=>{ if(e.target===$("sg")) $("sg").close(); });
 
