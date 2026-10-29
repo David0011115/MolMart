@@ -3,8 +3,9 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="color-scheme" content="light only">
-<meta name="theme-color" content="#fbf4e6">
+<meta name="color-scheme" content="light dark">
+<meta name="theme-color" content="#fbf4e6" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0c1a1f" media="(prefers-color-scheme: dark)">
 <link rel="manifest" href="manifest.json">
 <link rel="icon" type="image/png" sizes="192x192" href="icon-192.png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
@@ -24,12 +25,12 @@
   color-scheme:light;
   box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px);
 }
-@media (min-width:99999px){:root:not([data-theme="light"]){
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
   --bg:#0c1a1f;--surface:#14282f;--ink:#e6f1f3;--muted:#8fa8af;--line:#24404a;
   --tag:#ffd84a;--tag-ink:#1b1b10;--accent:#4cc3d3;--shadow:none;color-scheme:dark;}}
 :root[data-theme="dark"]{--bg:#0c1a1f;--surface:#14282f;--ink:#e6f1f3;--muted:#8fa8af;--line:#24404a;--accent:#4cc3d3;--shadow:none;color-scheme:dark}
 *{box-sizing:border-box}
-@media (min-width:99999px){:root:not([data-theme="light"]){--wm:#1d3a44;--wm-fill:#163039}}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--wm:#1d3a44;--wm-fill:#163039}}
 :root[data-theme="dark"]{--wm:#1d3a44;--wm-fill:#163039}
 .wm{position:fixed;inset:-20%;overflow:hidden;pointer-events:none;z-index:0;display:flex;flex-direction:column;justify-content:space-around;transform:rotate(-14deg)}
 .wm span{font:700 clamp(72px,20vw,150px)/1 Unbounded,Onest,system-ui,sans-serif;white-space:nowrap;color:transparent;background:linear-gradient(90deg,var(--b1) 0%,var(--b2) 35%,var(--b3) 65%,var(--b4) 100%);-webkit-background-clip:text;background-clip:text;opacity:.07;letter-spacing:-.03em}
@@ -235,6 +236,46 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .sgadd{width:76px;height:76px;border:1px dashed var(--accent);border-radius:12px;background:var(--bg);color:var(--accent);font:600 13px/1.2 Onest,system-ui,sans-serif;cursor:pointer;padding:4px}
 .sgadd:focus-visible,.sgth button:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
 .sgf .sgph-n{font-size:12px;color:var(--muted);margin:6px 0 0}
+/* ===== тёмная тема (по настройке телефона) ===== */
+@media (prefers-color-scheme:dark){
+:root:not([data-theme="light"]) body{background-image:none}
+:root:not([data-theme="light"]) header{background:rgba(20,40,47,.92)}
+:root:not([data-theme="light"]) h1{color:var(--ink)}
+:root:not([data-theme="light"]) .sub{color:var(--muted)}
+:root:not([data-theme="light"]) .lang,:root:not([data-theme="light"]) .abbtn{background:var(--surface);border-color:var(--accent);box-shadow:none}
+:root:not([data-theme="light"]) .lb,:root:not([data-theme="light"]) .abbtn{color:var(--accent)}
+:root:not([data-theme="light"]) .lb[aria-pressed="true"]{color:#fff}
+:root:not([data-theme="light"]) .close{background:rgba(20,40,47,.96)}
+:root:not([data-theme="light"]) .topbar .close{background:#0b7a8a}
+:root:not([data-theme="light"]) .blobs i{opacity:.12}
+:root:not([data-theme="light"]) .wm span{opacity:.05}
+:root:not([data-theme="light"]) .card,:root:not([data-theme="light"]) .pc{box-shadow:0 1px 2px rgba(0,0,0,.4)}
+:root:not([data-theme="light"]) .sgmsg.err{color:#ff8a8a}
+}
+/* ===== «Поделиться», оценка, «Что взять?» ===== */
+.shbtn{margin-right:auto;display:flex;align-items:center;gap:8px;height:44px;padding:0 16px;border:2px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
+.shbtn:focus-visible,.vbtn:focus-visible,.pickbtn:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.vote{margin-top:20px;padding:12px 14px;border:1px solid var(--line);border-radius:14px;display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.vote>span{font-weight:600;font-size:14px}
+.vote .vthx{color:var(--accent)}
+.vote div{display:flex;gap:8px}
+.vbtn{border:1px solid var(--line);background:var(--surface);border-radius:999px;min-width:56px;min-height:44px;font-size:22px;line-height:1;cursor:pointer;padding:0 14px}
+.pickrow{margin-top:12px}
+.pickbtn{border:2px dashed var(--accent);background:var(--surface);color:var(--accent);border-radius:999px;padding:0 18px;min-height:44px;font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
+.pk{padding:0 0 calc(24px + env(safe-area-inset-bottom,0px))}
+.pk .pkin{padding:16px 20px 0}
+.pk h2{font:700 19px/1.2 Unbounded,Onest,sans-serif;margin:0 0 4px}
+.pk .pkl{font-size:13px;color:var(--muted);margin:12px 0 6px}
+.pk .pkb{display:flex;gap:8px;flex-wrap:wrap}
+.pkres{display:flex;gap:14px;align-items:center;background:var(--bg);border:1px solid var(--line);border-radius:14px;padding:10px;margin:14px 0}
+.pkres .pic{width:96px;flex:none;border-radius:10px;font-size:40px}
+.pkres .t{min-width:0}
+.pkres .nm{font-weight:700;font-size:16px;line-height:1.25;overflow-wrap:anywhere}
+.pkres .price{margin-top:8px}
+.pkres .old+.price{margin-top:3px}
+.pkact{display:flex;gap:8px;flex-wrap:wrap}
+.sgbtn.alt{background:none;color:var(--accent);border:2px solid var(--accent)}
+.pknone{padding:18px 0;color:var(--muted)}
 </style>
 <script src="config.js"></script>
 <!-- Yandex.Metrika counter -->
@@ -268,6 +309,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
     <div class="selrow"><label class="sel"><span id="catlbl"></span><select id="catsel"></select></label><label class="sel"><span id="sortlbl"></span><select id="sort"></select></label></div>
     <div class="chips tags" id="tags"></div>
   </div>
+  <div class="pickrow" id="pickrow" hidden><button class="pickbtn" id="pickopen" type="button"></button></div>
   <section class="promo" id="promo" hidden></section>
   <main class="grid" id="grid"></main>
   <div class="empty" id="empty" hidden></div>
@@ -280,6 +322,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <dialog id="zm" class="zm" aria-label="Фото"><img id="zimg" alt=""></dialog>
 <dialog id="sg"></dialog>
 <dialog id="ab"></dialog>
+<dialog id="pk"></dialog>
 
 <script src="products.js"></script>
 <script>
@@ -297,11 +340,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же"},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын"}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -493,7 +536,7 @@ function renderSheet(i){
   const p = PRODUCTS[i];
   const block = (t,v)=> v ? `<h3>${esc(t)}</h3><p>${esc(v)}</p>` : "";
   $("sheet").innerHTML = `
-    <div class="topbar"><button class="close" aria-label="${esc(T("close"))}" id="x"><span>${esc(T("close"))}</span><b>×</b></button></div>
+    <div class="topbar"><button class="shbtn" id="shr" type="button"><svg viewBox="0 0 24 24" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.6 13.5l6.8 4M15.4 6.5l-6.8 4"/></svg><span>${esc(T("shr"))}</span></button><button class="close" aria-label="${esc(T("close"))}" id="x"><span>${esc(T("close"))}</span><b>×</b></button></div>
     <div class="pic">${badges(p)}${pic(p)}</div>
     <div class="in">
       <h2>${esc(tr(p,"name"))}</h2>
@@ -505,8 +548,52 @@ function renderSheet(i){
       ${block(T("nutr"),tr(p,"nutrition"))}
       ${block(T("shelf"),tr(p,"shelfLife"))}
       ${(p.composition||p.nutrition)?`<p class="note">${esc(T("note"))}</p>`:""}
+      <div class="vote" id="vote">${voteInner(p)}</div>
     </div>`;
   $("x").onclick = ()=>$("dlg").close();
+}
+/* ===== Поделиться, оценка, «Что взять?» ===== */
+function shareUrl(p){ return location.origin + location.pathname + "?p=" + encodeURIComponent(p.name) + "&src=share"; }
+function votes(){ try{ return JSON.parse(localStorage.getItem("votes")||"{}"); }catch(e){ return {}; } }
+function voteInner(p){
+  const v = votes()[p.name];
+  return `<span class="${v?"vthx":""}">${esc(v ? T("vthx")+" "+(v>0?"\u{1F44D}":"\u{1F44E}") : T("vq"))}</span>`
+    + (v ? "" : `<div><button class="vbtn" type="button" data-v="1" aria-label="${esc(T("vup"))}">\u{1F44D}</button><button class="vbtn" type="button" data-v="-1" aria-label="${esc(T("vdn"))}">\u{1F44E}</button></div>`);
+}
+async function copyText(t){
+  try{ await navigator.clipboard.writeText(t); return true; }catch(e){}
+  try{ const a=document.createElement("textarea"); a.value=t; a.setAttribute("readonly",""); a.style.cssText="position:fixed;opacity:0;top:0;left:0";
+    document.body.appendChild(a); a.select(); const ok=document.execCommand("copy"); a.remove(); return ok; }catch(e){ return false; }
+}
+let pkBudget=0, pkCur=-1; const pkSeen=new Set();
+function pkPool(){ return PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>!p.hidden&&!p.out&&(!pkBudget||(p.price!=null&&p.price<=pkBudget))); }
+function pkBudgets(){
+  const pr=PRODUCTS.filter(p=>!p.hidden&&!p.out&&p.price!=null).map(p=>p.price).sort((a,b)=>a-b);
+  if(pr.length<4) return [];
+  const r=v=>Math.max(500,Math.ceil(v/500)*500), top=pr[pr.length-1];
+  return [...new Set([r(pr[Math.floor(pr.length/3)]),r(pr[Math.floor(pr.length*2/3)])])].filter(v=>v<top);
+}
+function pkPick(){
+  const pool=pkPool(); if(!pool.length) return -1;
+  let fresh=pool.filter(o=>!pkSeen.has(o.i));
+  if(!fresh.length){ pkSeen.clear(); fresh=pool.filter(o=>o.i!==pkCur); if(!fresh.length) fresh=pool; }
+  const o=fresh[Math.floor(Math.random()*fresh.length)]; pkSeen.add(o.i); return o.i;
+}
+function renderPick(){
+  const bs=[0].concat(pkBudgets());
+  const chips=bs.map(b=>`<button class="chip" type="button" data-b="${b}" aria-pressed="${b===pkBudget}">${esc(b?T("pkUp").replace("{n}",fmt(b)):T("pkAny"))}</button>`).join("");
+  const p=pkCur>=0?PRODUCTS[pkCur]:null;
+  const res=p ? `<div class="pkres"><div class="pic">${pic(p)}</div><div class="t"><div class="nm">${esc(tr(p,"name"))}</div><div class="meta">${esc([p.brand,p.weight].filter(Boolean).join(", "))}</div>${oldTag(p)}<div class="price${p.price==null?" nop":""}">${fmt(p.price)}</div></div></div>
+    <div class="pkact"><button class="sgbtn" type="button" id="pkagain">${esc(T("pkAgain"))}</button><button class="sgbtn alt" type="button" id="pkopen2">${esc(T("pkOpen"))}</button></div>`
+    : `<p class="pknone">${esc(T("pkNone"))}</p>`;
+  $("pk").setAttribute("aria-label",T("pkTitle"));
+  $("pk").innerHTML=`<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="pkx"><span>${esc(T("close"))}</span><b>×</b></button></div>
+    <div class="pk"><div class="pkin"><h2>${esc(T("pkTitle"))}</h2>${bs.length>1?`<p class="pkl">${esc(T("pkBud"))}</p><div class="pkb">${chips}</div>`:""}${res}</div></div>`;
+  $("pkx").onclick=()=>$("pk").close();
+}
+function openPick(){
+  pkBudget=0; pkSeen.clear(); pkCur=pkPick(); renderPick();
+  if(!$("pk").open){ $("pk").showModal(); track("pick_open"); }
 }
 /* Статистика: какие товары открывают (Метрика → Отчёты → Параметры визитов; цель «card_open») */
 function track(goal,params){ try{ if(window.ym) ym(METRIKA_ID,"reachGoal",goal,params); }catch(e){} }
@@ -539,8 +626,10 @@ function applyLang(){
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
   $("abopen").hidden = !AB_ON(); $("abopen").setAttribute("aria-label", T("abBtn")); $("abopen").title = T("abBtn");
+  $("pickopen").textContent = "\u{1F3B2} " + T("pkBtn"); $("pickrow").hidden = !PRODUCTS.some(p=>!p.hidden&&!p.out);
   renderChips(); renderGrid(); renderSuggest(); renderShop();
   if($("ab").open) openAbout();
+  if($("pk").open) renderPick();
   if($("sg").open) openSuggest("", true);
   if($("dlg").open && curIdx>=0) renderSheet(curIdx);
 }
@@ -645,6 +734,34 @@ $("sg").addEventListener("change",async e=>{
 $("sg").addEventListener("submit",e=>{ if(e.target.id==="sgform") sgSubmit(e); });
 $("sg").addEventListener("click",e=>{ if(e.target===$("sg")) $("sg").close(); });
 
+$("sheet").addEventListener("click",async e=>{
+  const sb=e.target.closest("#shr");
+  if(sb){
+    const p=PRODUCTS[curIdx]; if(!p) return; const url=shareUrl(p);
+    track("share",{"Товар":p.name});
+    try{ if(navigator.share){ await navigator.share({title:SETTINGS.title,text:tr(p,"name")+(p.price!=null?" — "+fmt(p.price):""),url}); return; } }
+    catch(err){ if(err&&err.name==="AbortError") return; }
+    if(await copyText(url)){ const s=sb.querySelector("span"); s.textContent=T("shrDone"); setTimeout(()=>{ if(sb.isConnected) s.textContent=T("shr"); },2200); }
+    return;
+  }
+  const vb=e.target.closest(".vbtn");
+  if(vb){
+    const p=PRODUCTS[curIdx]; if(!p) return; const v=+vb.dataset.v;
+    try{ const m=votes(); m[p.name]=v; localStorage.setItem("votes",JSON.stringify(m)); }catch(err){}
+    track("vote",{"Товар":p.name,"Голос":v>0?"Нравится":"Не нравится"});
+    try{ if(window.ym) ym(METRIKA_ID,"params",{"Оценки":{[p.name]:{[v>0?"Нравится":"Не нравится"]:1}}}); }catch(err){}
+    $("vote").innerHTML=voteInner(p);
+  }
+});
+$("pickopen").addEventListener("click",openPick);
+$("pk").addEventListener("click",e=>{
+  if(e.target===$("pk")){ $("pk").close(); return; }
+  const b=e.target.closest("[data-b]");
+  if(b){ pkBudget=+b.dataset.b; pkSeen.clear(); pkCur=pkPick(); renderPick(); return; }
+  if(e.target.closest("#pkagain")){ pkCur=pkPick(); renderPick(); track("pick_again"); return; }
+  if(e.target.closest("#pkopen2")){ const i=pkCur; $("pk").close(); if(i>=0) openCard(i); }
+});
+
 document.querySelector(".lang").addEventListener("click",e=>{
   const b=e.target.closest(".lb"); if(!b) return;
   lang=b.dataset.l; try{localStorage.setItem("lang",lang)}catch(err){}
@@ -675,6 +792,8 @@ $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic">
     if(text) applyPrices(text);
   }catch(e){}
   applyLang();
+  try{ const dp=new URLSearchParams(location.search).get("p");
+    if(dp){ const i=PRODUCTS.findIndex(x=>x.name===dp&&!x.hidden); if(i>=0){ openCard(i); track("share_open"); } } }catch(e){}
 })();
 </script>
 </body>
