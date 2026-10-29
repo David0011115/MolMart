@@ -40,7 +40,7 @@ const METRIKA_ID = 113767885;
 const SUGGEST_URL = "https://script.google.com/macros/s/AKfycbzGKmEeckyEOeYvv6nJzc9esiXapptBEzwpAa4lf05FO84v0zLKSlflxB6QPmeX7GYAVw/exec";
 
 /* Кнопка «i» («О сайте») вверху слева: ник в Telegram разработчика (например "username") или полная ссылка. Пусто = кнопки нет. */
-const DEV_CONTACT = "";
+const DEV_CONTACT = "Turbodrager";
 
 /* Названия разделов на казахском */
 const CAT_KK = {"Сэндвичи":"Сэндвичтер","Панини":"Панини","Хот-доги":"Хот-догтар","Бургеры":"Бургерлер","Донер":"Дөнер","Кимпаб":"Кимпаб","Роллы":"Роллдар","Онигири":"Онигири","Пицца":"Пицца"};
