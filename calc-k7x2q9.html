@@ -1,0 +1,50 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Расчёт стоимости QR-каталога</title>
+<style>
+:root{--bg:#fffdf7;--ink:#2c2c2a;--mut:#6b6a63;--line:#e8e4d8;--g:#0f6e56;--gl:#e1f5ee;--card:#fff}
+@media(prefers-color-scheme:dark){:root{--bg:#0c1a1f;--ink:#f1efe8;--mut:#a9b3b0;--line:#26373d;--g:#5dcaa5;--gl:#12342d;--card:#13262c}}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:16px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+.w{max-width:520px;margin:0 auto;padding:20px 16px 40px}
+h1{font-size:22px;margin:0 0 4px}p.s{color:var(--mut);margin:0 0 18px}
+.f{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px;margin-bottom:12px}
+label.l{display:block;font-weight:600;margin-bottom:6px}
+input[type=number]{width:100%;min-height:46px;font-size:18px;border:1px solid var(--line);border-radius:10px;padding:0 12px;background:var(--bg);color:var(--ink)}
+.r{display:flex;gap:10px;align-items:center;min-height:44px}.r input{width:22px;height:22px;accent-color:var(--g)}
+.h{color:var(--mut);font-size:13px;margin-top:4px}
+.res{background:var(--gl);border-radius:16px;padding:16px;margin-top:16px}
+.res h2{margin:0 0 10px;font-size:15px;color:var(--mut);font-weight:600}
+.big{display:flex;justify-content:space-between;align-items:baseline;gap:10px;margin:6px 0}.big span{font-size:16px}.big b{font-size:30px;color:var(--g)}
+.big.m b{font-size:24px}
+table{width:100%;border-collapse:collapse;margin-top:10px;font-size:14px}td{padding:5px 0;border-top:1px solid var(--line)}td:last-child{text-align:right;white-space:nowrap}
+.n{color:var(--mut);font-size:12px;margin-top:12px}
+</style></head><body><div class="w">
+<h1>Расчёт стоимости</h1><p class="s">QR-каталог для магазина или кафе</p>
+<div class="f"><label class="l" for="np">Сколько товаров</label><input id="np" type="number" inputmode="numeric" min="0" value="40"></div>
+<div class="f"><div class="r"><input id="ph" type="checkbox" checked><label for="ph">Фото снимаю я</label></div>
+<label class="l" for="nf" style="margin-top:6px">Сколько фото</label><input id="nf" type="number" inputmode="numeric" min="0" value="40">
+<div class="h">Если фото даёт заказчик, снимите галочку.</div></div>
+<div class="f"><label class="l" for="nr">Холодильников всего</label><input id="nr" type="number" inputmode="numeric" min="1" value="2">
+<div class="h">Первые два входят в базовую цену.</div></div>
+<div class="f"><div class="r"><input id="dm" type="checkbox"><label for="dm">Свой домен .kz</label></div></div>
+<div class="res" id="res" aria-live="polite"></div>
+<p class="n">Расчёт ориентировочный. Точную сумму согласуем после списка товаров.</p>
+</div>
+<script>
+const R={base:40000,prod:400,photo:300,dom:15000,fr:5000,sup:5000,supProd:50};
+const $=id=>document.getElementById(id), fmt=n=>new Intl.NumberFormat("ru-RU").format(Math.round(n))+" ₸";
+const v=id=>Math.max(0,parseInt($(id).value)||0);
+function calc(){
+  const np=v("np"), nf=$("ph").checked?v("nf"):0, nr=Math.max(1,v("nr")), dm=$("dm").checked;
+  $("nf").disabled=!$("ph").checked;
+  const rows=[["Базовый запуск (сайт, QR, таблица, защита, ru и kk)",R.base],["Товары: "+np+" × "+R.prod,np*R.prod]];
+  if(nf) rows.push(["Фото: "+nf+" × "+R.photo,nf*R.photo]);
+  if(nr>2) rows.push(["Холодильники сверх двух: "+(nr-2)+" × "+R.fr,(nr-2)*R.fr]);
+  if(dm) rows.push(["Свой домен .kz (год и настройка)",R.dom]);
+  const launch=rows.reduce((a,r)=>a+r[1],0), sup=R.sup+np*R.supProd;
+  $("res").innerHTML='<h2>Запуск, разово</h2><div class="big"><span>Итого</span><b>'+fmt(launch)+'</b></div><table>'+rows.map(r=>'<tr><td>'+r[0]+'</td><td>'+fmt(r[1])+'</td></tr>').join('')+'</table><h2 style="margin-top:16px">Поддержка</h2><div class="big m"><span>В месяц</span><b>'+fmt(sup)+'</b></div><div class="h">'+R.sup+' ₸ + '+R.supProd+' ₸ за товар: правки, обновления, ответы на вопросы, защита и статистика.</div>';
+}
+document.querySelectorAll("input").forEach(e=>e.addEventListener("input",calc)); calc();
+</script></body></html>
