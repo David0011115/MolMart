@@ -75,6 +75,11 @@ with sync_playwright() as p:
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
     pg.goto(BASE + "demo/index.html"); pg.wait_for_selector("#grid .card")
+    pg.eval_on_selector("#budrange", "e=>{e.value=2;e.dispatchEvent(new Event('input',{bubbles:true}))}"); pg.wait_for_timeout(300)
+    nb = pg.locator("#grid .card").count()
+    check("демо: фильтр бюджета сужает список", 0 < nb < 12, nb)
+    pg.eval_on_selector("#budrange", "e=>{e.value=e.max;e.dispatchEvent(new Event('input',{bubbles:true}))}"); pg.wait_for_timeout(300)
+    check("демо: «Любой» возвращает все товары", pg.locator("#grid .card").count() == 12)
     check("демо: 12 товаров", pg.locator("#grid .card").count() == 12, pg.locator("#grid .card").count())
     check("демо: внизу название демо-магазина, а не MolMart", "MolMart" not in pg.inner_text("#shop") and "Тёплый хлеб" in pg.inner_text("#shop"), pg.inner_text("#shop")[:40])
     check("демо: плашка «Демо-версия» видна", not pg.eval_on_selector("#demonote", "e=>e.hidden"))

@@ -309,6 +309,12 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .abtn{display:flex;align-items:center;gap:8px;min-height:44px;padding:0 16px;border:2px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
 .abtn[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
 .abtn:focus-visible,.cmsel select:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.budget{margin-top:10px;background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:8px 14px 10px}
+.budget[hidden]{display:none}
+.budget .bt{display:flex;justify-content:space-between;align-items:baseline;font:600 14px Onest,system-ui,sans-serif}
+.budget .bt b{color:var(--accent);font-weight:700}
+.budget input{width:100%;margin:8px 0 2px;accent-color:var(--accent);min-height:28px}
+.budget .bc{font:500 12px Onest,system-ui,sans-serif;color:var(--muted)}
 .cashrow{margin-top:12px}
 .cashrow[hidden]{display:none}
 .cashbtn{border:2px solid var(--accent);background:var(--accent);color:var(--bg);border-radius:999px;padding:0 18px;min-height:44px;font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
@@ -371,6 +377,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
     <input class="search" id="q" type="search" autocomplete="off">
     <div class="selrow"><label class="sel"><span id="catlbl"></span><select id="catsel"></select></label><label class="sel"><span id="sortlbl"></span><select id="sort"></select></label></div>
     <div class="chips tags" id="tags"></div>
+    <div class="budget" id="budget" hidden><div class="bt"><span id="budlbl"></span><b id="budval"></b></div><input id="budrange" type="range" min="0" max="0" step="1" value="0"><div class="bc" id="budcnt"></div></div>
   </div>
   <div class="cashrow" id="cashrow" hidden><button class="cashbtn" id="cashopen" type="button"></button></div>
   <div class="pickrow" id="pickrow" hidden><button class="pickbtn" id="pickopen" type="button"></button></div>
@@ -407,11 +414,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashIn:"В списке кассира",cashClr:"Очистить список",cashRm:"Убрать",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",budT:"Бюджет",budAny:"Любой",budUp:"до {n}",budCnt:"Найдено: {n}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashIn:"В списке кассира",cashClr:"Очистить список",cashRm:"Убрать",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashIn:"Кассир тізімінде",cashClr:"Тізімді тазалау",cashRm:"Алып тастау",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",budT:"Бюджет",budAny:"Кез келген",budUp:"{n} дейін",budCnt:"Табылды: {n}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashIn:"Кассир тізімінде",cashClr:"Тізімді тазалау",cashRm:"Алып тастау",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -572,11 +579,30 @@ function matches(p,q){
   return qs.split(" ").filter(Boolean).every(tok=>tokenOk(tok,h));
 }
 
+let budMax=0;
+function budSteps(){
+  const ps=PRODUCTS.filter(p=>!p.hidden&&p.price!=null).map(p=>Math.ceil(p.price/100)*100);
+  return [...new Set(ps)].sort((a,b)=>a-b);
+}
+function renderBudget(n){
+  const st=budSteps(), box=$("budget");
+  if(st.length<4){ box.hidden=true; budMax=0; return; }
+  box.hidden=false; const r=$("budrange"); r.max=st.length; 
+  if(!budMax) r.value=st.length; else r.value=Math.max(0,st.findIndex(v=>v>=budMax));
+  $("budlbl").textContent=T("budT");
+  $("budval").textContent = budMax ? T("budUp").replace("{n}",fmt(budMax)) : T("budAny");
+  $("budcnt").textContent = budMax ? T("budCnt").replace("{n}",n) : "";
+}
+$("budrange").addEventListener("input",()=>{
+  const st=budSteps(), v=+$("budrange").value; budMax = v>=st.length ? 0 : st[v];
+  track("budget_set",{"Бюджет":budMax||"любой"}); renderGrid(false);
+});
 function renderGrid(anim=true){
   const q = query.trim().toLowerCase();
   const list = PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>{
     if(p.hidden) return false; /* временно скрыт */
     if(cat!=="ALL" && p.category!==cat) return false;
+    if(budMax && (p.price==null || p.price>budMax)) return false;
     for(const t of activeTags){ if(t==="stock"){ if(p.out) return false; } else if(t==="fav"){ if(!isFav(p)) return false; } else if(!(p.labels||[]).includes(t)) return false; }
     if(!q) return true;
     return matches(p,q);
@@ -599,6 +625,7 @@ function renderGrid(anim=true){
       </div>
     </button>`).join("");
   $("empty").hidden = list.length>0;
+  renderBudget(list.length);
   renderPromo();
 }
 function renderSheet(i){
