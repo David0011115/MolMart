@@ -1049,9 +1049,8 @@ async function runCheck(force){
     const day=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Almaty"}).format(new Date());
     if(!force){ try{ if(localStorage.getItem("chk")===day) return; }catch(e){} }
     const probs=[], vis=PRODUCTS.filter(p=>!p.hidden);
+    /* порядок: срочное (таблица, фото) раньше, «нет цены» одной строкой в конце */
     if(SETTINGS.pricesSheet && PRICES_SRC!=="sheet") probs.push("таблица цен недоступна, показаны запасные цены");
-    vis.forEach(p=>{ if(!p.out && !(p.price>0)) probs.push("нет цены: "+p.name); });
-    vis.forEach(p=>{ if(!(p.kk&&p.kk.name)) probs.push("нет казахского названия: "+p.name); });
     const bad=[], list=vis.filter(p=>p.image);
     const test=src=>new Promise(res=>{ const im=new Image(); const to=setTimeout(()=>res(false),8000);
       im.onload=()=>{clearTimeout(to);res(true)}; im.onerror=()=>{clearTimeout(to);res(false)}; im.src=src; });
@@ -1060,6 +1059,11 @@ async function runCheck(force){
       ok.forEach((v,k)=>{ if(!v) bad.push(part[k].name); });
     }
     bad.forEach(n=>probs.push("не открывается фото: "+n));
+    const noKk=vis.filter(p=>!(p.kk&&p.kk.name));
+    if(noKk.length>3) probs.push("нет казахского названия у "+noKk.length+" из "+vis.length+" товаров");
+    else noKk.forEach(p=>probs.push("нет казахского названия: "+p.name));
+    const noPrice=vis.filter(p=>!p.out && !(p.price>0));
+    if(noPrice.length) probs.push("нет цены у "+noPrice.length+" из "+vis.length+" товаров (см. лист «Цены»)");
     const q=new URLSearchParams({c:"1",src:PRICES_SRC,n:String(vis.length),p:probs.slice(0,12).join("|").slice(0,700),more:String(Math.max(0,probs.length-12)),t:String(Date.now())});
     await fetch(SUGGEST_URL+"?"+q.toString(),{method:"GET",mode:"no-cors"});
     try{ localStorage.setItem("chk",day); }catch(e){}
