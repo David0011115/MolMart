@@ -315,6 +315,10 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .budget .bt b{color:var(--accent);font-weight:700}
 .budget input{width:100%;margin:8px 0 2px;accent-color:var(--accent);min-height:28px}
 .budget .bc{font:500 12px Onest,system-ui,sans-serif;color:var(--muted)}
+.szrow{display:flex;gap:8px;flex-wrap:wrap;margin:10px 0 2px}
+.sz{min-height:44px;padding:0 16px;border:2px solid var(--accent);border-radius:999px;background:transparent;color:var(--accent);font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
+.sz[aria-pressed="true"]{background:var(--accent);color:var(--bg)}
+.sz.out{opacity:.5;text-decoration:line-through}
 .cashrow{margin-top:12px}
 .cashrow[hidden]{display:none}
 .cashbtn{border:2px solid var(--accent);background:var(--accent);color:var(--bg);border-radius:999px;padding:0 18px;min-height:44px;font:700 15px Onest,system-ui,sans-serif;cursor:pointer}
@@ -615,18 +619,35 @@ function renderGrid(anim=true){
     list.sort((a,b)=>isNew(b)-isNew(a));
   }
   list.sort((a,b)=>(a.p.out?1:0)-(b.p.out?1:0)); /* «Нет в наличии» — в конец */
-  $("grid").innerHTML = list.map(({p,i},n)=>`
-    <button class="card${anim?" rise":""}${p.out?" out":""}" data-i="${i}" style="animation-delay:${Math.min(n,8)*40}ms">
-      <div class="pic">${badges(p)}${pic(p)}${p.out?`<span class="oos">${esc(T("out"))}</span>`:""}</div>
+  /* Размеры: товары с одинаковым group показываются одной карточкой (размеры выбираются внутри) */
+  const gseen=new Set(), shown=[];
+  for(const o of list){ const g=o.p.group; if(g){ if(gseen.has(g)) continue; gseen.add(g); o.grp=list.filter(x=>x.p.group===g); } shown.push(o); }
+  $("grid").innerHTML = shown.map((o,n)=>{ const {p,i}=o, G=o.grp;
+    const gOut = G ? G.every(x=>x.p.out) : p.out;
+    const pr = G ? (G.filter(x=>!x.p.out&&x.p.price!=null).map(x=>x.p.price).concat(G.filter(x=>x.p.out&&x.p.price!=null).map(x=>x.p.price)).slice(0, G.some(x=>!x.p.out&&x.p.price!=null)?G.filter(x=>!x.p.out&&x.p.price!=null).length:99)) : [];
+    const minP = pr.length ? Math.min(...pr) : null, many = pr.length && Math.max(...pr)>minP;
+    const title = G ? (lang==="kk"&&p.kk&&p.kk.group ? p.kk.group : p.group) : shortName(p);
+    const meta = G ? G.map(x=>(lang==="kk"&&x.p.kk&&x.p.kk.size)||x.p.size||"").filter(Boolean).join(" · ") : [p.brand,p.weight].filter(Boolean).join(", ");
+    const priceTxt = G ? (minP==null ? T("noprice") : (many ? (lang==="kk" ? fmt(minP)+"-ден" : "от "+fmt(minP)) : fmt(minP))) : fmt(p.price);
+    const noP = G ? minP==null : p.price==null;
+    return `
+    <button class="card${anim?" rise":""}${gOut?" out":""}" data-i="${i}" style="animation-delay:${Math.min(n,8)*40}ms">
+      <div class="pic">${badges(p)}${pic(p)}${gOut?`<span class="oos">${esc(T("out"))}</span>`:""}</div>
       <div class="body">
-        <div class="name" title="${esc(tr(p,"name"))}">${esc(shortName(p))}</div>
-        <div class="meta">${esc([p.brand,p.weight].filter(Boolean).join(", "))}</div>
-        ${oldTag(p)}<div class="price${p.price==null?" nop":""}">${fmt(p.price)}</div>${updTag(p,"pdate")}
+        <div class="name" title="${esc(G?title:tr(p,"name"))}">${esc(title)}</div>
+        <div class="meta">${esc(meta)}</div>
+        ${G?"":oldTag(p)}<div class="price${noP?" nop":""}">${priceTxt}</div>${G?"":updTag(p,"pdate")}
       </div>
-    </button>`).join("");
-  $("empty").hidden = list.length>0;
-  renderBudget(list.length);
+    </button>`; }).join("");
+  $("empty").hidden = shown.length>0;
+  renderBudget(shown.length);
   renderPromo();
+}
+function sizeRow(p){
+  if(!p.group) return "";
+  const ms=PRODUCTS.map((q,k)=>({q,k})).filter(({q})=>!q.hidden&&q.group===p.group);
+  if(ms.length<2) return "";
+  return `<div class="szrow" role="group">${ms.map(({q,k})=>`<button class="sz${q.out?" out":""}" type="button" data-sz="${k}" aria-pressed="${q===p}">${esc((lang==="kk"&&q.kk&&q.kk.size)||q.size||q.name)}</button>`).join("")}</div>`;
 }
 function renderSheet(i){
   const p = PRODUCTS[i];
@@ -637,6 +658,7 @@ function renderSheet(i){
     <div class="in">
       <h2>${esc(tr(p,"name"))}</h2>
       <div class="meta">${esc([p.brand,catName(p.category),p.weight].filter(Boolean).join(", "))}</div>
+      ${sizeRow(p)}
       <div class="row">${oldTag(p)}<span class="price${p.price==null?" nop":""}">${fmt(p.price)}</span></div>
       ${p.out?`<div class="oosl">${esc(T("out"))}</div>`:""}
       ${updTag(p,"pdate big")}
@@ -867,6 +889,8 @@ $("sheet").addEventListener("click",e=>{
   if(fb){ const p=PRODUCTS[curIdx]; if(!p) return; const on=toggleFav(p);
     fb.setAttribute("aria-pressed",on); fb.textContent=(on?"♥ ":"♡ ")+T(on?"faved":"fav"); return; }
   if(e.target.closest("#cmpbtn") && curIdx>=0) openCompare(curIdx);
+  const sz=e.target.closest("[data-sz]");
+  if(sz){ curIdx=+sz.dataset.sz; renderSheet(curIdx); track("size_pick",{"Товар":PRODUCTS[curIdx].name}); return; }
   const cb=e.target.closest("#cashone");
   if(cb && curIdx>=0){ const on=toggleCash(PRODUCTS[curIdx]); cb.setAttribute("aria-pressed",on); cb.textContent="\u{1F9FE} "+T(on?"cashIn":"cashOne"); }
 });

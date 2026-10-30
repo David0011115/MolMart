@@ -91,6 +91,22 @@ with sync_playwright() as p:
     check("демо: закрыто от поисковиков (noindex)", pg.get_attribute('meta[name="robots"]', "content") == "noindex,nofollow")
     check("основной сайт не закрыт от поисковиков", "noindex" not in root_src)
     c.close()
+    # демо кофейни: размеры одной карточкой
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
+    pg.goto(BASE + "demo-cafe/index.html"); pg.wait_for_selector("#grid .card")
+    check("кафе: размеры собраны в карточки (13 карточек из 18 позиций)", pg.locator("#grid .card").count() == 13, pg.locator("#grid .card").count())
+    pg.fill("#q", "капучино"); pg.wait_for_timeout(400)
+    check("кафе: поиск показывает одну карточку «Капучино»", pg.locator("#grid .card").count() == 1)
+    pg.click("#grid .card >> nth=0"); pg.wait_for_selector("#dlg[open]")
+    check("кафе: в карточке три размера", pg.locator("#dlg .sz").count() == 3, pg.locator("#dlg .sz").count())
+    p1 = pg.inner_text("#dlg .price"); pg.click('#dlg .sz >> nth=1'); p2 = pg.inner_text("#dlg .price")
+    check("кафе: смена размера меняет цену", p1 != p2, (p1, p2))
+    check("кафе: нет ошибок", not errs, errs[:2])
+    root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    want = root_src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">', 1)
+    check("кафе: код совпадает с основным сайтом (запусти tools/make_demo.py)", want == open(os.path.join(ROOT, "demo-cafe", "index.html"), encoding="utf-8").read())
+    c.close()
     # калькулятор
     c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
