@@ -629,13 +629,14 @@ function renderGrid(anim=true){
     const meta = G ? G.map(x=>(lang==="kk"&&x.p.kk&&x.p.kk.size)||x.p.size||"").filter(Boolean).join(" · ") : [p.brand,p.weight].filter(Boolean).join(", ");
     const priceTxt = G ? (minP==null ? T("noprice") : (many ? (lang==="kk" ? fmt(minP)+"-ден" : "от "+fmt(minP)) : fmt(minP))) : fmt(p.price);
     const noP = G ? minP==null : p.price==null;
+    const allP = (G && many) ? G.map(x=>x.p.price!=null ? new Intl.NumberFormat("ru-RU").format(x.p.price) : "—").join(" · ")+"\u00a0"+SETTINGS.currency : "";
     return `
     <button class="card${anim?" rise":""}${gOut?" out":""}" data-i="${i}" style="animation-delay:${Math.min(n,8)*40}ms">
       <div class="pic">${badges(p)}${pic(p)}${gOut?`<span class="oos">${esc(T("out"))}</span>`:""}</div>
       <div class="body">
         <div class="name" title="${esc(G?title:tr(p,"name"))}">${esc(title)}</div>
         <div class="meta">${esc(meta)}</div>
-        ${G?"":oldTag(p)}<div class="price${noP?" nop":""}">${priceTxt}</div>${G?"":updTag(p,"pdate")}
+        ${G?"":oldTag(p)}<div class="price${noP?" nop":""}">${priceTxt}</div>${G?(allP?`<div class="pdate">${esc(allP)}</div>`:""):updTag(p,"pdate")}
       </div>
     </button>`; }).join("");
   $("empty").hidden = shown.length>0;
@@ -646,7 +647,7 @@ function sizeRow(p){
   if(!p.group) return "";
   const ms=PRODUCTS.map((q,k)=>({q,k})).filter(({q})=>!q.hidden&&q.group===p.group);
   if(ms.length<2) return "";
-  return `<div class="szrow" role="group">${ms.map(({q,k})=>`<button class="sz${q.out?" out":""}" type="button" data-sz="${k}" aria-pressed="${q===p}">${esc((lang==="kk"&&q.kk&&q.kk.size)||q.size||q.name)}</button>`).join("")}</div>`;
+  return `<div class="szrow" role="group">${ms.map(({q,k})=>`<button class="sz${q.out?" out":""}" type="button" data-sz="${k}" aria-pressed="${q===p}">${esc(((lang==="kk"&&q.kk&&q.kk.size)||q.size||q.name)+(q.price!=null?" · "+fmt(q.price):""))}</button>`).join("")}</div>`;
 }
 function renderSheet(i){
   const p = PRODUCTS[i];
