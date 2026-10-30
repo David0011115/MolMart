@@ -515,7 +515,7 @@ function renderShop(){
   if(SHOP.phone) rows.push(`<p><b>${esc(T("tel"))}:</b> <a href="tel:${esc(SHOP.phone.replace(/[^\d+]/g,""))}">${esc(SHOP.phone)}</a></p>`);
   if(SHOP.map) rows.push(`<p><a href="${esc(SHOP.map)}" target="_blank" rel="noopener">${esc(T("map"))} →</a></p>`);
   box.hidden = !rows.length;
-  box.innerHTML = rows.length ? `<h2>${esc(T("shop"))}</h2>${rows.join("")}` : "";
+  box.innerHTML = rows.length ? `<h2>${esc(lang==="kk" ? SETTINGS.title+" дүкені" : "Магазин "+SETTINGS.title)}</h2>${rows.join("")}` : "";
 }
 
 function esc(s){return String(s==null?"":s).replace(/[&<>"]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]))}
@@ -968,6 +968,7 @@ function applyBrand(){
   s.setProperty("--b1",c.c1); s.setProperty("--b2",c.c2); s.setProperty("--b3",c.c3); s.setProperty("--b4",c.c4);
   const name = BRAND.part1 + BRAND.part2, txt = `${esc(BRAND.part1)}<b>${esc(BRAND.part2)}</b>`, t = $("title");
   t.setAttribute("aria-label", name); t.innerHTML = txt;
+  const am=document.querySelector('meta[name="apple-mobile-web-app-title"]'); if(am) am.setAttribute("content", SETTINGS.title);
   if(BRAND.logo){ const im = new Image(); im.alt = name; im.onload = ()=>{ t.classList.add("logo"); t.replaceChildren(im); }; im.src = BRAND.logo; }
   document.querySelector(".wm").innerHTML = `<span>${txt} ${txt}</span>`.repeat(6);
 }

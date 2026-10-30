@@ -76,6 +76,7 @@ with sync_playwright() as p:
     pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
     pg.goto(BASE + "demo/index.html"); pg.wait_for_selector("#grid .card")
     check("демо: 12 товаров", pg.locator("#grid .card").count() == 12, pg.locator("#grid .card").count())
+    check("демо: внизу название демо-магазина, а не MolMart", "MolMart" not in pg.inner_text("#shop") and "Тёплый хлеб" in pg.inner_text("#shop"), pg.inner_text("#shop")[:40])
     check("демо: плашка «Демо-версия» видна", not pg.eval_on_selector("#demonote", "e=>e.hidden"))
     check("демо: нет ошибок и битых файлов", not errs, errs[:3])
     root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
