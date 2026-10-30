@@ -138,6 +138,13 @@ with sync_playwright() as p:
     check("настройки: логотип-картинка в шапке", pg.locator("#title.logo img").count() == 1)
     check("настройки: основной цвет применён", pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--b1').trim()") == "#336699")
     check("настройки: Telegram из листа попал в «О сайте»", pg.evaluate("abLink()") == "https://t.me/test_dev", pg.evaluate("abLink()"))
+    # блик на логотипе: галочка в листе «Настройки» (нет строки или TRUE = есть, FALSE = нет)
+    for val, want in (("", "block"), ("TRUE", "block"), ("FALSE", "none")):
+        body = SET_CSV + ("Блик на логотипе," + val + ",x\n" if val else "")
+        pb = c.new_page(); pb.route(re.compile(r"gid=777000444"), (lambda bb: (lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=bb)))(body))
+        pb.goto(BASE + "index.html"); pb.wait_for_selector("#title.logo .lg"); pb.wait_for_timeout(300)
+        d = pb.evaluate("getComputedStyle(document.querySelector('#title .lg'),'::after').display")
+        check("настройки: блик на логотипе " + (val or "(строки нет)") + " -> " + want, d == want, d); pb.close()
     p2 = c.new_page(); p2.route(re.compile(r"gid=777000444"), lambda r: r.abort())
     p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card"); p2.wait_for_timeout(500)
     check("настройки: если лист не открылся, остаётся последняя сохранённая копия", "Тестовая 1" in p2.inner_text("#shop"), p2.inner_text("#shop")[:60]); p2.close()
