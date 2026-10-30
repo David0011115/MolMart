@@ -111,7 +111,7 @@ with sync_playwright() as p:
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
     pg.goto(BASE + "demo-cafe/index.html"); pg.wait_for_selector("#grid .card")
-    check("кафе: размеры собраны в карточки (17 карточек из 22 позиций)", pg.locator("#grid .card").count() == 17, pg.locator("#grid .card").count())
+    check("кафе: размеры собраны в карточки (22 карточки из 27 позиций)", pg.locator("#grid .card").count() == 22, pg.locator("#grid .card").count())
     pg.fill("#q", "капучино"); pg.wait_for_timeout(400)
     check("кафе: на карточке в списке видны цены всех размеров", "·" in pg.inner_text("#grid .card >> nth=0"), pg.inner_text("#grid .card >> nth=0"))
     check("кафе: поиск показывает одну карточку «Капучино»", pg.locator("#grid .card").count() == 1)
@@ -133,6 +133,15 @@ with sync_playwright() as p:
     check("кафе: номер столика на экране кассира", "Столик 5" in pg.inner_text("#cash"), pg.inner_text("#cash")[:60])
     pg.keyboard.press("Escape"); pg.click('.lb[data-l="kk"]'); pg.wait_for_timeout(200)
     check("кафе: столик на казахском", "Үстел 5" in pg.inner_text("#tblbar"), pg.inner_text("#tblbar"))
+    # меню по времени (часы Алматы = UTC+5): утро 09:00 и вечер 20:00
+    for hh, iso, early_late, eve_late in ((9, "2026-10-30T04:00:00Z", False, True), (20, "2026-10-30T15:00:00Z", True, False)):
+        pc = c.new_page(); pc.clock.set_fixed_time(iso); pc.goto(BASE + "demo-cafe/index.html"); pc.wait_for_selector("#grid .card")
+        pc.fill("#q", "сырники"); pc.wait_for_timeout(400)
+        check(f"кафе {hh}:00: завтрак {'недоступен' if early_late else 'доступен'}", (pc.locator("#grid .card.late").count() == 1) == early_late)
+        pc.fill("#q", "паста"); pc.wait_for_timeout(400)
+        check(f"кафе {hh}:00: вечернее меню {'недоступно' if eve_late else 'доступно'}", (pc.locator("#grid .card.late").count() == 1) == eve_late)
+        if eve_late: check(f"кафе {hh}:00: подпись «с 17:00»", "17:00" in pc.inner_text("#grid .card .oos.lt"), pc.inner_text("#grid .card"))
+        pc.close()
     pg.evaluate("sessionStorage.clear()"); pg.goto(BASE + "demo-cafe/index.html?table=%3Cb%3E"); pg.wait_for_selector("#grid .card")
     check("кафе: мусор в ?table= игнорируется", pg.eval_on_selector("#tblbar", "e=>e.hidden"))
     root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
