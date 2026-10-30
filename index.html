@@ -1039,7 +1039,7 @@ if("serviceWorker" in navigator && location.protocol==="https:") navigator.servi
 $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic"></div><div class="body"><div class="ln"></div><div class="ln s"></div><div class="ln p"></div></div></div>`.repeat(6);
 
 let PRICES_SRC="none";
-/* ===== Самопроверка: раз в сутки с устройства, отправляет итог в лист «Проверки» (см. скрипт Проверки.gs) =====
+/* ===== Самопроверка: раз в сутки с устройства, отправляет итог в лист «Логи проверки» (см. скрипт Проверки.gs) =====
    Включается вместе с SUGGEST_URL (тот же адрес). Не работает в демо, офлайн и в автотестах (navigator.webdriver). */
 const CHK_ON = ()=> typeof SUGGEST_URL!=="undefined" && !!SUGGEST_URL;
 async function runCheck(force){
