@@ -1038,14 +1038,42 @@ applyBrand();
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic"></div><div class="body"><div class="ln"></div><div class="ln s"></div><div class="ln p"></div></div></div>`.repeat(6);
 
+let PRICES_SRC="none";
+/* ===== Самопроверка: раз в сутки с устройства, отправляет итог в лист «Проверки» (см. скрипт Проверки.gs) =====
+   Включается вместе с SUGGEST_URL (тот же адрес). Не работает в демо, офлайн и в автотестах (navigator.webdriver). */
+const CHK_ON = ()=> typeof SUGGEST_URL!=="undefined" && !!SUGGEST_URL;
+async function runCheck(force){
+  try{
+    if(!CHK_ON()) return;
+    if(!force && (navigator.webdriver || !navigator.onLine || (navigator.connection&&navigator.connection.saveData))) return;
+    const day=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Almaty"}).format(new Date());
+    if(!force){ try{ if(localStorage.getItem("chk")===day) return; }catch(e){} }
+    const probs=[], vis=PRODUCTS.filter(p=>!p.hidden);
+    if(SETTINGS.pricesSheet && PRICES_SRC!=="sheet") probs.push("таблица цен недоступна, показаны запасные цены");
+    vis.forEach(p=>{ if(!p.out && !(p.price>0)) probs.push("нет цены: "+p.name); });
+    vis.forEach(p=>{ if(!(p.kk&&p.kk.name)) probs.push("нет казахского названия: "+p.name); });
+    const bad=[], list=vis.filter(p=>p.image);
+    const test=src=>new Promise(res=>{ const im=new Image(); const to=setTimeout(()=>res(false),8000);
+      im.onload=()=>{clearTimeout(to);res(true)}; im.onerror=()=>{clearTimeout(to);res(false)}; im.src=src; });
+    for(let i=0;i<list.length;i+=6){
+      const part=list.slice(i,i+6), ok=await Promise.all(part.map(p=>test(p.image)));
+      ok.forEach((v,k)=>{ if(!v) bad.push(part[k].name); });
+    }
+    bad.forEach(n=>probs.push("не открывается фото: "+n));
+    const q=new URLSearchParams({c:"1",src:PRICES_SRC,n:String(vis.length),p:probs.slice(0,12).join("|").slice(0,700),more:String(Math.max(0,probs.length-12)),t:String(Date.now())});
+    await fetch(SUGGEST_URL+"?"+q.toString(),{method:"GET",mode:"no-cors"});
+    try{ localStorage.setItem("chk",day); }catch(e){}
+    return probs;
+  }catch(e){}
+}
 async function loadPrices(){
   try{
     const get=async(url,ms)=>{ const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),ms);
       try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
         const t=r.ok?await r.text():""; return /товар/i.test(t.split("\n")[0]||"")?t:""; } finally{ clearTimeout(to); } };
-    let text="";
-    if(SETTINGS.pricesSheet){ try{ text=await get(SETTINGS.pricesSheet,4000); }catch(e){} }
-    if(!text){ try{ text=await get(SETTINGS.pricesFile,4000); }catch(e){} }
+    let text=""; PRICES_SRC="none";
+    if(SETTINGS.pricesSheet){ try{ text=await get(SETTINGS.pricesSheet,4000); if(text) PRICES_SRC="sheet"; }catch(e){} }
+    if(!text){ try{ text=await get(SETTINGS.pricesFile,4000); if(text) PRICES_SRC="file"; }catch(e){} }
     if(text) applyPrices(text);
   }catch(e){}
 }
@@ -1054,6 +1082,7 @@ window.addEventListener("online",async()=>{ await loadPrices(); applyLang(); });
 (async()=>{
   await loadPrices();
   applyLang();
+  setTimeout(()=>runCheck(),6000);
   try{ const dp=new URLSearchParams(location.search).get("p");
     if(dp){ const i=PRODUCTS.findIndex(x=>x.name===dp&&!x.hidden); if(i>=0){ openCard(i); track("share_open"); } } }catch(e){}
 })();

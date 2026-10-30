@@ -65,6 +65,18 @@ with sync_playwright() as p:
         check(f"[{scheme}] баннер исчезает при возврате сети", pg.eval_on_selector("#offline", "e=>e.hidden"))
         check(f"[{scheme}] нет ошибок JavaScript", not errs, errs[:2])
         c.close()
+    # самопроверка: отчёт уходит GET-запросом, повторно в тот же день не шлётся
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
+    reqs = []
+    pg.route("https://script.google.com/**", lambda r: (reqs.append(r.request.url), r.fulfill(status=200, body="{}"))[0])
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card")
+    probs = pg.evaluate("runCheck(true)")
+    check("самопроверка: отчёт отправлен", len(reqs) == 1 and "c=1" in reqs[0], reqs[:1])
+    check("самопроверка: проблем с фото нет", not any("фото" in x for x in (probs or [])), probs)
+    pg.evaluate("localStorage.setItem('chk', new Intl.DateTimeFormat('en-CA',{timeZone:'Asia/Almaty'}).format(new Date()))")
+    n0 = len(reqs); pg.evaluate("runCheck()"); pg.wait_for_timeout(300)
+    check("самопроверка: в тот же день повторно не шлётся", len(reqs) == n0)
+    c.close()
     # срок жизни: избранное хранится долго, список кассира 10 минут
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
     pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card")
