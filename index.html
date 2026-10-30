@@ -298,6 +298,9 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .pknone{padding:18px 0;color:var(--muted)}
 .offl{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#faeeda;border:1px solid #ef9f27;color:#412402;font:600 13.5px/1.35 Onest,system-ui,sans-serif}
 .offl[hidden]{display:none}
+.demo{margin:12px 0 0;padding:6px 12px;border-radius:10px;background:#faeeda;border:1px solid #ef9f27;color:#412402;font:600 12.5px/1.3 Onest,system-ui,sans-serif;text-align:center}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .demo{background:#3a2d12;border-color:#8a6420;color:#ffd9a0}}
+:root[data-theme="dark"] .demo{background:#3a2d12;border-color:#8a6420;color:#ffd9a0}
 .offl svg{flex:none;margin-top:1px}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .offl{background:#3a2d12;border-color:#8a6420;color:#ffd9a0}}
 :root[data-theme="dark"] .offl{background:#3a2d12;border-color:#8a6420;color:#ffd9a0}
@@ -355,6 +358,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <div class="wm" aria-hidden="true"><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span><span>Mol<b>Mart</b> Mol<b>Mart</b></span></div>
 <div class="wrap">
   <div class="offl" id="offline" role="status" hidden></div>
+  <div class="demo" id="demonote" hidden></div>
   <header>
     <button class="abbtn" id="abopen" type="button" hidden>i</button>
     <div class="tools"><button class="thbtn" id="thbtn" type="button"></button><div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div></div>
@@ -678,6 +682,10 @@ function openAbout(){
   $("abgo").onclick = ()=>track("about_contact");
   if(!$("ab").open){ $("ab").showModal(); track("about_open"); }
 }
+function updateDemo(){
+  const d = typeof DEMO_NOTE!=="undefined" && DEMO_NOTE, el=$("demonote");
+  el.hidden = !d; if(d) el.textContent = d[lang] || d.ru;
+}
 function updateOffline(){
   const off = typeof navigator.onLine==="boolean" && !navigator.onLine, box=$("offline");
   box.hidden = !off;
@@ -696,7 +704,7 @@ function applyLang(){
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
   $("abopen").hidden = !AB_ON(); $("abopen").setAttribute("aria-label", T("abBtn")); $("abopen").title = T("abBtn");
-  updateOffline(); applyThemeBtn();
+  updateDemo(); updateOffline(); applyThemeBtn();
   $("pickopen").textContent = "\u{1F3B2} " + T("pkBtn"); $("pickrow").hidden = !PRODUCTS.some(p=>!p.hidden&&!p.out);
   renderChips(); renderGrid(); renderSuggest(); renderShop();
   if($("ab").open) openAbout();

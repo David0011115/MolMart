@@ -71,6 +71,16 @@ with sync_playwright() as p:
         gf = p2.evaluate("JSON.parse(localStorage.getItem('favs')||'[]').length"); gc = p2.evaluate("JSON.parse(localStorage.getItem('cash')||'[]').length")
         check(f"через {mins} мин: избранное {wf}, список кассира {wc}", (gf, gc) == (wf, wc), (gf, gc)); p2.close()
     c.close()
+    # демо-версия
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
+    pg.goto(BASE + "demo/index.html"); pg.wait_for_selector("#grid .card")
+    check("демо: 12 товаров", pg.locator("#grid .card").count() == 12, pg.locator("#grid .card").count())
+    check("демо: плашка «Демо-версия» видна", not pg.eval_on_selector("#demonote", "e=>e.hidden"))
+    check("демо: нет ошибок и битых файлов", not errs, errs[:3])
+    same = open(os.path.join(ROOT, "index.html"), "rb").read() == open(os.path.join(ROOT, "demo", "index.html"), "rb").read()
+    check("демо: код совпадает с основным сайтом (если нет, запусти tools/make_demo.py)", same)
+    c.close()
     # калькулятор
     c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
