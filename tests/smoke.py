@@ -59,6 +59,16 @@ with sync_playwright() as p:
         check(f"[{scheme}] баннер исчезает при возврате сети", pg.eval_on_selector("#offline", "e=>e.hidden"))
         check(f"[{scheme}] нет ошибок JavaScript", not errs, errs[:2])
         c.close()
+    # срок жизни избранного
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card")
+    nm = pg.evaluate("PRODUCTS.filter(p=>!p.hidden).slice(0,2).map(p=>p.name)")
+    for mins, want in ((5, 2), (11, 0)):
+        pg.evaluate("([n,m])=>{localStorage.setItem('favs',JSON.stringify(n));localStorage.setItem('favsSeen',String(Date.now()-m*60000))}", [nm, mins])
+        p2 = c.new_page(); p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card")
+        got = p2.evaluate("JSON.parse(localStorage.getItem('favs')||'[]').length")
+        check(f"избранное: через {mins} мин после закрытия остаётся {want}", got == want, got); p2.close()
+    c.close()
     # калькулятор
     c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))

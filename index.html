@@ -847,12 +847,22 @@ $("pk").addEventListener("click",e=>{
 
 /* ===== Избранное и сравнение ===== */
 function favNames(){ try{ const a=JSON.parse(localStorage.getItem("favs")||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+/* Избранное и список для кассира живут недолго: через FAV_TTL_MIN минут после закрытия сайта список очищается */
+const FAV_TTL_MIN = 10;
+function favSeen(){ try{ localStorage.setItem("favsSeen",String(Date.now())); }catch(e){} }
+(function(){ try{
+  const t=+localStorage.getItem("favsSeen")||0;
+  if(t && Date.now()-t > FAV_TTL_MIN*60000) localStorage.removeItem("favs");
+  favSeen();
+}catch(e){} })();
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") favSeen(); });
+window.addEventListener("pagehide",favSeen);
 const isFav = p => favNames().includes(p.name);
 const favCount = () => PRODUCTS.filter(p=>!p.hidden&&isFav(p)).length;
 function toggleFav(p){
   let a=favNames(); const on=a.includes(p.name);
   a = on ? a.filter(n=>n!==p.name) : a.concat(p.name);
-  try{ localStorage.setItem("favs",JSON.stringify(a)); }catch(e){}
+  try{ localStorage.setItem("favs",JSON.stringify(a)); }catch(e){} favSeen();
   track(on?"fav_remove":"fav_add",{"Товар":p.name});
   if(!favCount()) activeTags.delete("fav");
   renderChips(); if(activeTags.has("fav")) renderGrid(false);
