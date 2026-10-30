@@ -318,6 +318,8 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .cash .big{font:700 56px/1.1 Unbounded,Onest,sans-serif;color:var(--accent);margin:8px 0}
 .cash .tot{display:flex;justify-content:space-between;align-items:baseline;margin-top:14px;font:700 20px Onest,system-ui,sans-serif}
 .cash .tot b{font:700 34px Unbounded,Onest,sans-serif;color:var(--accent)}
+.cash li button.rm{border:0;background:transparent;color:var(--muted);font:700 22px/1 Onest,sans-serif;min-width:44px;min-height:44px;cursor:pointer}
+.cash .clr{margin-top:14px;border:2px solid var(--accent);background:transparent;color:var(--accent);border-radius:999px;padding:0 18px;min-height:44px;font:700 14px Onest,system-ui,sans-serif;cursor:pointer}
 .cash .cx{margin:6px 0 0;font:500 13px Onest,system-ui,sans-serif;color:var(--muted);text-align:left}
 .cmp{padding:16px 20px calc(24px + env(safe-area-inset-bottom,0px))}
 .cmp h2{font:700 19px/1.2 Unbounded,Onest,sans-serif;margin:0 0 10px}
@@ -400,11 +402,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashIn:"В списке кассира",cashClr:"Очистить список",cashRm:"Убрать",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashIn:"Кассир тізімінде",cashClr:"Тізімді тазалау",cashRm:"Алып тастау",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -525,7 +527,7 @@ function renderChips(){
   $("catsel").innerHTML = [["ALL",T("all")]].concat(cats.map(c=>[c,catName(c)])).map(([v,n])=>`<option value="${esc(v)}"${v===cat?" selected":""}>${esc(n)}</option>`).join("");
   const used = Object.keys(LABELS).filter(k=>k==="stock" ? PRODUCTS.some(p=>p.out) : k==="fav" ? favCount()>0 : PRODUCTS.some(p=>(p.labels||[]).includes(k)));
   $("tags").innerHTML = used.map(k=>`<button class="chip" aria-pressed="${activeTags.has(k)}" data-t="${k}">${esc(lbl(k))}</button>`).join("");
-  const n=favCount(); $("cashrow").hidden = !(activeTags.has("fav") && n>0);
+  const n=cashList().length; $("cashrow").hidden = n<1;
   $("cashopen").textContent = "\u{1F9FE} "+T("cashBtn")+" ("+n+")";
 }
 /* ===== УМНЫЙ ПОИСК: опечатки, латиница/кириллица, казахские буквы ===== */
@@ -606,7 +608,7 @@ function renderSheet(i){
       <div class="row">${oldTag(p)}<span class="price${p.price==null?" nop":""}">${fmt(p.price)}</span></div>
       ${p.out?`<div class="oosl">${esc(T("out"))}</div>`:""}
       ${updTag(p,"pdate big")}
-      <div class="acts"><button class="abtn" id="fav" type="button" aria-pressed="${isFav(p)}">${esc((isFav(p)?"♥ ":"♡ ")+T(isFav(p)?"faved":"fav"))}</button><button class="abtn" id="cmpbtn" type="button">⇄ ${esc(T("cmpBtn"))}</button><button class="abtn" id="cashone" type="button">\u{1F9FE} ${esc(T("cashOne"))}</button></div>
+      <div class="acts"><button class="abtn" id="fav" type="button" aria-pressed="${isFav(p)}">${esc((isFav(p)?"♥ ":"♡ ")+T(isFav(p)?"faved":"fav"))}</button><button class="abtn" id="cmpbtn" type="button">⇄ ${esc(T("cmpBtn"))}</button><button class="abtn" id="cashone" type="button" aria-pressed="${isCash(p)}">\u{1F9FE} ${esc(T(isCash(p)?"cashIn":"cashOne"))}</button></div>
       ${block(T("comp"),tr(p,"composition"))}
       ${block(T("nutr"),tr(p,"nutrition"))}
       ${block(T("shelf"),tr(p,"shelfLife"))}
@@ -829,7 +831,8 @@ $("sheet").addEventListener("click",e=>{
   if(fb){ const p=PRODUCTS[curIdx]; if(!p) return; const on=toggleFav(p);
     fb.setAttribute("aria-pressed",on); fb.textContent=(on?"♥ ":"♡ ")+T(on?"faved":"fav"); return; }
   if(e.target.closest("#cmpbtn") && curIdx>=0) openCompare(curIdx);
-  if(e.target.closest("#cashone") && curIdx>=0) openCash([curIdx]);
+  const cb=e.target.closest("#cashone");
+  if(cb && curIdx>=0){ const on=toggleCash(PRODUCTS[curIdx]); cb.setAttribute("aria-pressed",on); cb.textContent="\u{1F9FE} "+T(on?"cashIn":"cashOne"); }
 });
 $("cmp").addEventListener("change",e=>{
   if(e.target.id==="cma") cmA=+e.target.value; else if(e.target.id==="cmb") cmB=+e.target.value; else return;
@@ -858,21 +861,42 @@ function toggleFav(p){
   renderChips(); if(activeTags.has("fav")) renderGrid(false);
   return !on;
 }
-let cashIdx=[];
+/* Список для кассы: отдельно от избранного, живёт CASH_TTL_MIN минут после закрытия сайта */
+const CASH_TTL_MIN = 10;
+function cashSeen(){ try{ localStorage.setItem("cashSeen",String(Date.now())); }catch(e){} }
+(function(){ try{
+  const t=+localStorage.getItem("cashSeen")||0;
+  if(t && Date.now()-t > CASH_TTL_MIN*60000) localStorage.removeItem("cash");
+  cashSeen();
+}catch(e){} })();
+document.addEventListener("visibilitychange",()=>{ if(document.visibilityState==="hidden") cashSeen(); });
+window.addEventListener("pagehide",cashSeen);
+function cashNames(){ try{ const a=JSON.parse(localStorage.getItem("cash")||"[]"); return Array.isArray(a)?a:[]; }catch(e){ return []; } }
+const isCash = p => cashNames().includes(p.name);
+const cashList = () => PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>!p.hidden&&isCash(p)).map(({i})=>i);
+function saveCash(a){ try{ localStorage.setItem("cash",JSON.stringify(a)); }catch(e){} cashSeen(); }
+function toggleCash(p){
+  let a=cashNames(); const on=a.includes(p.name);
+  saveCash(on ? a.filter(n=>n!==p.name) : a.concat(p.name));
+  track(on?"cash_remove":"cash_add",{"Товар":p.name}); renderChips(); return !on;
+}
 function renderCash(){
-  const ps=cashIdx.map(i=>PRODUCTS[i]).filter(Boolean); if(!ps.length){ $("cash").close(); return; }
+  const idx=cashList(), ps=idx.map(i=>PRODUCTS[i]); if(!ps.length){ if($("cash").open) $("cash").close(); return; }
   $("cash").setAttribute("aria-label",T("cashBtn"));
-  const known=ps.filter(p=>p.price!=null), total=known.reduce((a,p)=>a+p.price,0);
+  const total=ps.filter(p=>p.price!=null).reduce((a,p)=>a+p.price,0);
   const body = ps.length===1
     ? `<div class="one">${esc(tr(ps[0],"name"))}</div><div class="cn">${esc([ps[0].brand,ps[0].weight].filter(Boolean).join(", "))}</div><div class="big">${esc(fmt(ps[0].price))}</div>`
-    : `<ul>${ps.map(p=>`<li><span>${esc(tr(p,"name"))}${p.weight?`<small>${esc(p.weight)}</small>`:""}</span><span>${esc(fmt(p.price))}</span></li>`).join("")}</ul><div class="tot"><span>${esc(T("cashTot"))}</span><b>${esc(fmt(total))}</b></div><p class="cx">${esc(T("cashNote"))}</p>`;
-  $("cash").innerHTML=`<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="cashx"><span>${esc(T("close"))}</span><b>×</b></button></div><div class="cash"><p class="cn">${esc(T("cashHint"))}</p>${body}</div>`;
+    : `<ul>${ps.map((p,k)=>`<li><span>${esc(tr(p,"name"))}${p.weight?`<small>${esc(p.weight)}</small>`:""}</span><span>${esc(fmt(p.price))}</span><button class="rm" type="button" data-rm="${idx[k]}" aria-label="${esc(T("cashRm"))}">×</button></li>`).join("")}</ul><div class="tot"><span>${esc(T("cashTot"))}</span><b>${esc(fmt(total))}</b></div><p class="cx">${esc(T("cashNote"))}</p>`;
+  $("cash").innerHTML=`<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="cashx"><span>${esc(T("close"))}</span><b>×</b></button></div><div class="cash"><p class="cn">${esc(T("cashHint"))}</p>${body}<button class="clr" type="button" id="cashclr">${esc(T("cashClr"))}</button></div>`;
   $("cashx").onclick=()=>$("cash").close();
 }
-function openCash(idx){
-  cashIdx=idx; renderCash(); if(!$("cash").open){ $("cash").showModal(); track("cashier_open",{"Товаров":idx.length}); }
-}
-$("cashopen").addEventListener("click",()=>openCash(PRODUCTS.map((p,i)=>({p,i})).filter(({p})=>!p.hidden&&isFav(p)).map(({i})=>i)));
+function openCash(){ renderCash(); if(!$("cash").open && cashList().length){ $("cash").showModal(); track("cashier_open",{"Товаров":cashList().length}); } }
+$("cashopen").addEventListener("click",openCash);
+$("cash").addEventListener("click",e=>{
+  const rm=e.target.closest("[data-rm]"), cl=e.target.closest("#cashclr");
+  if(rm){ const p=PRODUCTS[+rm.dataset.rm]; saveCash(cashNames().filter(n=>n!==p.name)); renderChips(); renderCash(); return; }
+  if(cl){ saveCash([]); renderChips(); $("cash").close(); }
+});
 $("cash").addEventListener("click",e=>{ if(e.target===$("cash")) $("cash").close(); });
 let cmA=-1, cmB=-1;
 function cmpOptions(sel){

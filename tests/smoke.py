@@ -34,14 +34,16 @@ with sync_playwright() as p:
         # карточка + избранное + кассир + сравнение
         pg.click("#grid .card >> nth=0"); pg.wait_for_selector("#dlg[open]")
         pg.click("#fav"); check(f"[{scheme}] избранное ставится", pg.get_attribute("#fav", "aria-pressed") == "true")
-        pg.click("#cashone"); pg.wait_for_selector("#cash[open]")
-        check(f"[{scheme}] кассир-экран показывает цену", "₸" in pg.inner_text("#cash") or "уточн" in pg.inner_text("#cash").lower())
-        pg.click("#cashx"); pg.click("#cmpbtn"); pg.wait_for_selector("#cmp[open]")
+        pg.click("#cashone"); check(f"[{scheme}] товар добавляется в список кассира", pg.get_attribute("#cashone", "aria-pressed") == "true")
+        pg.click("#cmpbtn"); pg.wait_for_selector("#cmp[open]")
         check(f"[{scheme}] сравнение открывается", pg.locator("#cmg .cmc").count() > 0)
         pg.click("#cmx"); pg.keyboard.press("Escape")
-        pg.click('.chip[data-t="fav"]'); pg.wait_for_timeout(300)
-        check(f"[{scheme}] кнопка «Показать кассиру» в избранном", not pg.eval_on_selector("#cashrow", "e=>e.hidden"))
-        pg.click("#cashopen"); pg.wait_for_selector("#cash[open]"); pg.click("#cashx")
+        pg.wait_for_timeout(300)
+        check(f"[{scheme}] кнопка «Показать кассиру» появляется", not pg.eval_on_selector("#cashrow", "e=>e.hidden"))
+        pg.click("#cashopen"); pg.wait_for_selector("#cash[open]")
+        check(f"[{scheme}] кассир-экран показывает цену", "₸" in pg.inner_text("#cash") or "уточн" in pg.inner_text("#cash").lower())
+        pg.click("#cashclr"); pg.wait_for_timeout(300)
+        check(f"[{scheme}] список кассира очищается кнопкой", pg.eval_on_selector("#cashrow", "e=>e.hidden"))
         # «Что взять?»
         pg.click("#pickopen"); pg.wait_for_selector("#pk[open]"); pg.keyboard.press("Escape")
         # тема
@@ -59,6 +61,16 @@ with sync_playwright() as p:
         check(f"[{scheme}] баннер исчезает при возврате сети", pg.eval_on_selector("#offline", "e=>e.hidden"))
         check(f"[{scheme}] нет ошибок JavaScript", not errs, errs[:2])
         c.close()
+    # срок жизни: избранное хранится долго, список кассира 10 минут
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card")
+    nm = pg.evaluate("PRODUCTS.filter(p=>!p.hidden).slice(0,2).map(p=>p.name)")
+    for mins, wf, wc in ((5, 2, 2), (11, 2, 0)):
+        pg.evaluate("([n,m])=>{localStorage.setItem('favs',JSON.stringify(n));localStorage.setItem('cash',JSON.stringify(n));localStorage.setItem('cashSeen',String(Date.now()-m*60000))}", [nm, mins])
+        p2 = c.new_page(); p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card")
+        gf = p2.evaluate("JSON.parse(localStorage.getItem('favs')||'[]').length"); gc = p2.evaluate("JSON.parse(localStorage.getItem('cash')||'[]').length")
+        check(f"через {mins} мин: избранное {wf}, список кассира {wc}", (gf, gc) == (wf, wc), (gf, gc)); p2.close()
+    c.close()
     # калькулятор
     c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
