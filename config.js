@@ -9,7 +9,8 @@ const SETTINGS = {
   currency: "₸",
   updated: "24.10.2026",  /* запасная дата, если в prices.csv колонка «Изменено» пустая */
   pricesFile: "prices.csv", /* запасная таблица цен в репозитории */
-  pricesSheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTk7FDojlhKMCJh2NyYePtZnVX7Q7t3yW9qjATTRVe1WBB7EoDIeRBbU1TviOMe-PQf1JIoo0LLZlA-/pub?gid=392017231&single=true&output=csv"          /* ссылка на опубликованную Google Таблицу (CSV); если пусто или недоступна — берётся pricesFile */
+  pricesSheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTk7FDojlhKMCJh2NyYePtZnVX7Q7t3yW9qjATTRVe1WBB7EoDIeRBbU1TviOMe-PQf1JIoo0LLZlA-/pub?gid=392017231&single=true&output=csv"          /* ссылка на опубликованную Google Таблицу (CSV); если пусто или недоступна — берётся pricesFile */,
+  settingsGid: "777000444"  /* номер листа «Настройки» в той же таблице (число после gid= в его адресе); пусто = лист не читается */
 };
 
 /* ===== ИНФОРМАЦИЯ О МАГАЗИНЕ (заготовка) =====
@@ -40,7 +41,7 @@ const METRIKA_ID = 113767885;
 const SUGGEST_URL = "https://script.google.com/macros/s/AKfycbzGKmEeckyEOeYvv6nJzc9esiXapptBEzwpAa4lf05FO84v0zLKSlflxB6QPmeX7GYAVw/exec";
 
 /* Кнопка «i» («О сайте») вверху слева: ник в Telegram разработчика (например "username") или полная ссылка. Пусто = кнопки нет. */
-const DEV_CONTACT = "Turbodrager";
+let DEV_CONTACT = "Turbodrager";
 
 /* Названия разделов на казахском */
 const CAT_KK = {"Сэндвичи":"Сэндвичтер","Панини":"Панини","Хот-доги":"Хот-догтар","Бургеры":"Бургерлер","Донер":"Дөнер","Кимпаб":"Кимпаб","Роллы":"Роллдар","Онигири":"Онигири","Пицца":"Пицца"};

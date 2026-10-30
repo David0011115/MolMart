@@ -300,6 +300,9 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .offl{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#faeeda;border:1px solid #ef9f27;color:#412402;font:600 13.5px/1.35 Onest,system-ui,sans-serif}
 .offl[hidden]{display:none}
 .demo{margin:12px 0 0;padding:6px 12px;border-radius:10px;background:#faeeda;border:1px solid #ef9f27;color:#412402;font:600 12.5px/1.3 Onest,system-ui,sans-serif;text-align:center}
+.annc{margin:12px 0 0;padding:8px 14px;border-radius:10px;background:#e6f1fb;border:1px solid #378add;color:#042c53;font:600 13.5px/1.35 Onest,system-ui,sans-serif;text-align:center;overflow-wrap:anywhere}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .annc{background:#14283a;border-color:#2f6aa3;color:#cfe4ff}}
+:root[data-theme="dark"] .annc{background:#14283a;border-color:#2f6aa3;color:#cfe4ff}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .demo{background:#3a2d12;border-color:#8a6420;color:#ffd9a0}}
 :root[data-theme="dark"] .demo{background:#3a2d12;border-color:#8a6420;color:#ffd9a0}
 .offl svg{flex:none;margin-top:1px}
@@ -370,6 +373,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <div class="wrap">
   <div class="offl" id="offline" role="status" hidden></div>
   <div class="demo" id="demonote" hidden></div>
+  <div class="annc" id="annc" role="status" hidden></div>
   <header>
     <button class="abbtn" id="abopen" type="button" hidden>i</button>
     <div class="tools"><button class="thbtn" id="thbtn" type="button"></button><div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div></div>
@@ -439,6 +443,8 @@ function expireNew(p){
 PRODUCTS.forEach(expireNew);
 
 const $ = id => document.getElementById(id);
+let ANNC = "";
+const SS_KEY = "site_settings:" + location.pathname.replace(/[^\/]*$/,"");
 let lang = "ru", cat = "ALL", query = "", activeTags = new Set(), curIdx = -1, sortMode = "def";
 try{ const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language||"").toLowerCase().startsWith("kk") ? "kk" : "ru"); }catch(e){}
 if(lang!=="kk") lang="ru";
@@ -456,11 +462,11 @@ const oldTag = p => hasOld(p) ? `<span class="old">${fmt(p.oldPrice)}</span>` : 
    Акция действует, если 0 < Акционная цена < Цена и (Акция до пусто или сегодня по Алматы ≤ Акция до). Метка «Акция» ставится автоматически.
    Старый формат (Текущая цена, Цена до скидки) тоже читается. Товар ищется по точному названию. Метки через запятую: Халал, Острое, Новинка, Хит, Акция.
    Если файл не загрузился, остаются значения из кода. */
-function parseCSV(t){
+function parseCSV(t,semi=true){
   t=t.replace(/^﻿/,""); const rows=[]; let row=[],f="",q=false;
   for(let i=0;i<t.length;i++){const c=t[i];
     if(q){ if(c=='"'){ if(t[i+1]=='"'){f+='"';i++;} else q=false; } else f+=c; }
-    else if(c=='"') q=true; else if(c==','||c==';'){row.push(f);f="";}
+    else if(c=='"') q=true; else if(c==','||(semi&&c==';')){row.push(f);f="";}
     else if(c=='\n'){row.push(f);rows.push(row);row=[];f="";} else if(c!='\r') f+=c;
   }
   if(f||row.length){row.push(f);rows.push(row);} return rows;
@@ -746,6 +752,7 @@ function updateDemo(){
   const d = typeof DEMO_NOTE!=="undefined" && DEMO_NOTE, el=$("demonote");
   el.hidden = !d; if(d) el.textContent = d[lang] || d.ru;
 }
+function updateAnnc(){ const el=$("annc"); el.hidden=!ANNC; el.textContent=ANNC; }
 function updateOffline(){
   const off = typeof navigator.onLine==="boolean" && !navigator.onLine, box=$("offline");
   box.hidden = !off;
@@ -764,7 +771,7 @@ function applyLang(){
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
   $("abopen").hidden = !AB_ON(); $("abopen").setAttribute("aria-label", T("abBtn")); $("abopen").title = T("abBtn");
-  updateDemo(); updateOffline(); applyThemeBtn();
+  updateDemo(); updateAnnc(); updateOffline(); applyThemeBtn();
   $("pickopen").textContent = "\u{1F3B2} " + T("pkBtn"); $("pickrow").hidden = !PRODUCTS.some(p=>!p.hidden&&!p.out);
   renderChips(); renderGrid(); renderSuggest(); renderShop();
   if($("ab").open) openAbout();
@@ -1034,6 +1041,7 @@ function applyBrand(){
   if(BRAND.logo){ const im = new Image(); im.alt = name; im.onload = ()=>{ t.classList.add("logo"); t.replaceChildren(im); }; im.src = BRAND.logo; }
   document.querySelector(".wm").innerHTML = `<span>${txt} ${txt}</span>`.repeat(6);
 }
+try{ const sc=localStorage.getItem(SS_KEY); if(sc) applySiteSettings(sc); }catch(e){}
 applyBrand();
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic"></div><div class="body"><div class="ln"></div><div class="ln s"></div><div class="ln p"></div></div></div>`.repeat(6);
@@ -1081,10 +1089,43 @@ async function loadPrices(){
     if(text) applyPrices(text);
   }catch(e){}
 }
+/* ===== ЛИСТ «НАСТРОЙКИ» (Google Таблица) =====
+   Колонки: Параметр, Значение, Что это. Непустое значение заменяет значение из config.js; пустое оставляет как в config.js
+   (кроме «Объявление сверху»: пусто = объявление скрыто). Лист должен быть опубликован в интернете (CSV), как и лист «Цены».
+   Недоступен или не опубликован: сайт работает на значениях из config.js и на последней сохранённой копии настроек. */
+function applySiteSettings(text){
+  const rows=parseCSV(text,false); if(rows.length<2) return;
+  const m={}; for(const r of rows.slice(1)){ const k=(r[0]||"").trim().toLowerCase(); if(k) m[k]=(r[1]||"").trim(); }
+  const v=k=>m[k]||"";
+  const title=v("название магазина");
+  if(title){ SETTINGS.title=title; if(title!==BRAND.part1+BRAND.part2){ BRAND.part1=title; BRAND.part2=""; } }
+  const addr=v("адрес"); if(addr){ if(addr!==SHOP.address) SHOP.address_kk=""; SHOP.address=addr; }
+  const hrs=v("часы работы"); if(hrs){ if(hrs!==SHOP.hours) SHOP.hours_kk=""; SHOP.hours=hrs; }
+  if(v("телефон")) SHOP.phone=v("телефон");
+  ANNC=v("объявление сверху").slice(0,200);
+  const tg=v("telegram для связи"); if(/^(@?[A-Za-z0-9_]{4,32}|https?:\/\/\S+)$/.test(tg)) DEV_CONTACT=tg;
+  const lg=v("логотип (ссылка на файл)"); if(/^(https?:\/\/\S+|[\w\-.\/]+\.(png|jpe?g|webp|svg))$/i.test(lg)) BRAND.logo=lg;
+  const col=v("основной цвет"); if(/^#[0-9a-f]{6}$/i.test(col)) BRAND.colors={c1:col,c2:col,c3:col,c4:col};
+  const dl=v("язык по умолчанию").toLowerCase();
+  if(dl==="ru"||dl==="kk"){ let saved=null; try{ saved=localStorage.getItem("lang"); }catch(e){}
+    if(!saved && !(navigator.language||"").toLowerCase().startsWith("kk")) lang=dl; }
+}
+async function loadSiteSettings(){
+  try{
+    const gid=SETTINGS.settingsGid, base=SETTINGS.pricesSheet; let text="";
+    if(gid && base){
+      const url=base.replace(/gid=\d+/,"gid="+gid), ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),3500);
+      try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
+        const t=r.ok?await r.text():""; if(/параметр/i.test(t.split("\n")[0]||"")) text=t; }catch(e){} finally{ clearTimeout(to); }
+    }
+    if(text){ try{ localStorage.setItem(SS_KEY,text); }catch(e){} }
+    if(text){ applySiteSettings(text); applyBrand(); }
+  }catch(e){}
+}
 window.addEventListener("offline",updateOffline);
-window.addEventListener("online",async()=>{ await loadPrices(); applyLang(); });
+window.addEventListener("online",async()=>{ await Promise.all([loadPrices(),loadSiteSettings()]); applyLang(); });
 (async()=>{
-  await loadPrices();
+  await Promise.all([loadPrices(),loadSiteSettings()]);
   applyLang();
   setTimeout(()=>runCheck(),6000);
   try{ const dp=new URLSearchParams(location.search).get("p");

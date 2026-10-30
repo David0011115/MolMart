@@ -1,6 +1,6 @@
 """Быстрая проверка сайта. Запуск: python3 tests/smoke.py
 Нужны: pip install playwright && playwright install chromium"""
-import sys, threading, http.server, socketserver, functools, os
+import re, sys, threading, http.server, socketserver, functools, os
 from playwright.sync_api import sync_playwright
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -124,6 +124,33 @@ with sync_playwright() as p:
     root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
     want = root_src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">', 1)
     check("кафе: код совпадает с основным сайтом (запусти tools/make_demo.py)", want == open(os.path.join(ROOT, "demo-cafe", "index.html"), encoding="utf-8").read())
+    c.close()
+    # лист «Настройки»: значения из таблицы заменяют значения из config.js, пустые не трогают
+    SET_CSV = "Параметр,Значение,Что это\nНазвание магазина,TestShop,x\nАдрес,Тестовая 1,x\nЧасы работы,,x\nОбъявление сверху,Сегодня до 22:00; приходите,x\nОсновной цвет,#336699,x\nЛоготип (ссылка на файл),icon-192.png,x\nTelegram для связи,test_dev,x\n"
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.route(re.compile(r"gid=777000444"), lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=SET_CSV))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card"); pg.wait_for_timeout(800)
+    check("настройки: адрес из листа показан в блоке магазина", "Тестовая 1" in pg.inner_text("#shop"), pg.inner_text("#shop")[:60])
+    check("настройки: пустые часы остаются из config.js", "8:00" in pg.inner_text("#shop"), pg.inner_text("#shop")[:80])
+    check("настройки: объявление с «;» показано целиком", pg.inner_text("#annc") == "Сегодня до 22:00; приходите", pg.inner_text("#annc"))
+    check("настройки: название магазина в заголовке вкладки", pg.title().startswith("TestShop"), pg.title())
+    check("настройки: логотип-картинка в шапке", pg.locator("#title.logo img").count() == 1)
+    check("настройки: основной цвет применён", pg.evaluate("getComputedStyle(document.documentElement).getPropertyValue('--b1').trim()") == "#336699")
+    check("настройки: Telegram из листа попал в «О сайте»", pg.evaluate("abLink()") == "https://t.me/test_dev", pg.evaluate("abLink()"))
+    p2 = c.new_page(); p2.route(re.compile(r"gid=777000444"), lambda r: r.abort())
+    p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card"); p2.wait_for_timeout(500)
+    check("настройки: если лист не открылся, остаётся последняя сохранённая копия", "Тестовая 1" in p2.inner_text("#shop"), p2.inner_text("#shop")[:60]); p2.close()
+    check("настройки: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    # лист «Настройки» недоступен: сайт работает на config.js, объявления нет
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.route(re.compile(r"gid=777000444"), lambda r: r.fulfill(status=404, body="no"))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card"); pg.wait_for_timeout(500)
+    check("настройки недоступны: адрес из config.js", "Улы Дала" in pg.inner_text("#shop"), pg.inner_text("#shop")[:60])
+    check("настройки недоступны: объявление скрыто", pg.eval_on_selector("#annc", "e=>e.hidden"))
+    check("настройки недоступны: нет ошибок JavaScript", not errs, errs[:2])
     c.close()
     # калькулятор
     c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
