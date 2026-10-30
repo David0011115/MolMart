@@ -3,7 +3,11 @@
 (config.js, products.js, prices.csv, manifest.json, img/) остаются как есть."""
 import shutil, os
 R = os.path.dirname(os.path.dirname(os.path.abspath(__file__))); D = os.path.join(R, "demo")
-for f in ("index.html", "sw.js"):
-    shutil.copy2(os.path.join(R, f), os.path.join(D, f))
+NOINDEX = '<meta name="robots" content="noindex,nofollow">'
+def demo_html(src):
+    """Страница демо = основной index.html + запрет индексации поисковиками."""
+    return src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n' + NOINDEX, 1)
+shutil.copy2(os.path.join(R, "sw.js"), os.path.join(D, "sw.js"))
+open(os.path.join(D, "index.html"), "w", encoding="utf-8").write(demo_html(open(os.path.join(R, "index.html"), encoding="utf-8").read()))
 shutil.copytree(os.path.join(R, "fonts"), os.path.join(D, "fonts"), dirs_exist_ok=True)
 print("demo обновлено из корня")

@@ -78,8 +78,12 @@ with sync_playwright() as p:
     check("демо: 12 товаров", pg.locator("#grid .card").count() == 12, pg.locator("#grid .card").count())
     check("демо: плашка «Демо-версия» видна", not pg.eval_on_selector("#demonote", "e=>e.hidden"))
     check("демо: нет ошибок и битых файлов", not errs, errs[:3])
-    same = open(os.path.join(ROOT, "index.html"), "rb").read() == open(os.path.join(ROOT, "demo", "index.html"), "rb").read()
+    root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    want = root_src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">', 1)
+    same = want == open(os.path.join(ROOT, "demo", "index.html"), encoding="utf-8").read()
     check("демо: код совпадает с основным сайтом (если нет, запусти tools/make_demo.py)", same)
+    check("демо: закрыто от поисковиков (noindex)", pg.get_attribute('meta[name="robots"]', "content") == "noindex,nofollow")
+    check("основной сайт не закрыт от поисковиков", "noindex" not in root_src)
     c.close()
     # калькулятор
     c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
