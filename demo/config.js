@@ -22,4 +22,4 @@ const SUGGEST_URL = "";
 const CAT_KK = {"Хлеб": "Нан", "Выпечка": "Тоқаш-тағам", "Десерты": "Десерттер", "Напитки": "Сусындар"};
 const DEV_CONTACT = "Turbodrager";
 const CAT_WORD = {"Хлеб":"Хлеб","Выпечка":"Выпечка","Десерты":"Десерт","Напитки":"Напиток"};
-const NEW_DAYS = 14;
+const NEW_DAYS = 365;

@@ -304,6 +304,13 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 .offl{display:flex;gap:8px;align-items:flex-start;margin:12px 0 0;padding:10px 14px;border-radius:12px;background:#faeeda;border:1px solid #ef9f27;color:#412402;font:600 13.5px/1.35 Onest,system-ui,sans-serif}
 .offl[hidden]{display:none}
 .demo{margin:12px 0 0;padding:6px 12px;border-radius:10px;background:#faeeda;border:1px solid #ef9f27;color:#412402;font:600 12.5px/1.3 Onest,system-ui,sans-serif;text-align:center}
+.tblbar{margin:10px auto 0;width:max-content;max-width:100%;padding:6px 16px;border-radius:999px;background:var(--surface);border:1px solid var(--line);color:var(--ink);font:600 14px Onest,system-ui,sans-serif}
+.alg{margin:18px 0 0;padding:10px 12px;border-radius:12px;background:#fff1d6;border:1px solid #e0a030;color:#5a3a00}
+.alg h3{margin:0 0 3px;color:#8a5a00;font-weight:700}
+:root[data-theme="dark"] .alg{background:#3a2c10;border-color:#a8741c;color:#f3dca8}
+:root[data-theme="dark"] .alg h3{color:#f0b95a}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .alg{background:#3a2c10;border-color:#a8741c;color:#f3dca8}:root:not([data-theme="light"]) .alg h3{color:#f0b95a}}
+.cash .tbl{font:700 22px Onest,system-ui,sans-serif;margin:0 0 6px}
 .annc{margin:12px 0 0;padding:8px 14px;border-radius:10px;background:#e6f1fb;border:1px solid #378add;color:#042c53;font:600 13.5px/1.35 Onest,system-ui,sans-serif;text-align:center;overflow-wrap:anywhere}
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .annc{background:#14283a;border-color:#2f6aa3;color:#cfe4ff}}
 :root[data-theme="dark"] .annc{background:#14283a;border-color:#2f6aa3;color:#cfe4ff}
@@ -378,6 +385,7 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
   <div class="offl" id="offline" role="status" hidden></div>
   <div class="demo" id="demonote" hidden></div>
   <div class="annc" id="annc" role="status" hidden></div>
+  <div class="tblbar" id="tblbar" hidden></div>
   <header>
     <button class="abbtn" id="abopen" type="button" hidden>i</button>
     <div class="tools"><button class="thbtn" id="thbtn" type="button"></button><div class="lang" role="group" aria-label="Язык / Тіл"><button class="lb" data-l="ru" aria-pressed="true">RU</button><button class="lb" data-l="kk" aria-pressed="false">ҚАЗ</button></div></div>
@@ -425,11 +433,11 @@ const LABELS = {
 
 const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
-      empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",nutr:"Пищевая ценность",shelf:"Срок годности",
+      empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",alg:"Аллергены",tbl:"Столик",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"Данные из открытых источников, могут отличаться от указанных на упаковке.",noprice:"Цена уточняется",out:"Нет в наличии",
       close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",hwLink:"Как это работает",hwTitle:"Как это работает",hw1:"Отсканируйте QR-код на холодильнике камерой телефона.",hw2:"Выберите товар: цены и акции показаны сразу, приложение ставить не нужно.",hw3:"Подойдите к кассе. Товар можно добавить в «Кассиру», чтобы показать список на кассе.",hwNote:"Цены обновляются автоматически, всегда видна свежая цена.",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",budT:"Бюджет",budAny:"Любой",budUp:"до {n}",budCnt:"Найдено: {n}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashIn:"В списке кассира",cashClr:"Очистить список",cashRm:"Убрать",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
-      empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
+      empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",alg:"Аллергендер",tbl:"Үстел",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"Деректер ашық көздерден алынған, қаптамадағы мәліметтен өзгеше болуы мүмкін.",noprice:"Баға нақтылануда",out:"Қолда жоқ",
       close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",hwLink:"Бұл қалай жұмыс істейді",hwTitle:"Бұл қалай жұмыс істейді",hw1:"Тоңазытқыштағы QR-кодты телефон камерасымен сканерлеңіз.",hw2:"Тауарды таңдаңыз: бағалар мен акциялар бірден көрінеді, қолданба орнатудың қажеті жоқ.",hw3:"Кассаға барыңыз. Тауарды «Кассирге» тізіміне қосып, кассада көрсетуге болады.",hwNote:"Бағалар автоматты түрде жаңарады, әрқашан жаңа баға көрінеді.",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",budT:"Бюджет",budAny:"Кез келген",budUp:"{n} дейін",budCnt:"Табылды: {n}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashIn:"Кассир тізімінде",cashClr:"Тізімді тазалау",cashRm:"Алып тастау",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
 };
@@ -676,9 +684,10 @@ function renderSheet(i){
       ${updTag(p,"pdate big")}
       <div class="acts"><button class="abtn" id="fav" type="button" aria-pressed="${isFav(p)}">${esc((isFav(p)?"♥ ":"♡ ")+T(isFav(p)?"faved":"fav"))}</button><button class="abtn" id="cmpbtn" type="button">⇄ ${esc(T("cmpBtn"))}</button><button class="abtn" id="cashone" type="button" aria-pressed="${isCash(p)}">\u{1F9FE} ${esc(T(isCash(p)?"cashIn":"cashOne"))}</button></div>
       ${block(T("comp"),tr(p,"composition"))}
+      ${tr(p,"allergens")?`<div class="alg"><h3>⚠ ${esc(T("alg"))}</h3><p>${esc(tr(p,"allergens"))}</p></div>`:""}
       ${block(T("nutr"),tr(p,"nutrition"))}
       ${block(T("shelf"),tr(p,"shelfLife"))}
-      ${(p.composition||p.nutrition)?`<p class="note">${esc(T("note"))}</p>`:""}
+      ${(p.composition||p.nutrition||p.allergens)?`<p class="note">${esc(T("note"))}</p>`:""}
       <div class="vote" id="vote">${voteInner(p)}</div>
     </div>`;
   $("x").onclick = ()=>$("dlg").close();
@@ -728,6 +737,13 @@ function openPick(){
 }
 /* Статистика: какие товары открывают (Метрика → Отчёты → Параметры визитов; цель «card_open») */
 function track(goal,params){ try{ if(window.ym) ym(METRIKA_ID,"reachGoal",goal,params); }catch(e){} }
+/* QR на столике: адрес вида ?table=5. Номер держится до закрытия вкладки, показывается кассиру и попадает в статистику Метрики. */
+const TBL_RE=/^[0-9A-Za-zА-Яа-я-]{1,6}$/;
+const TABLE=(()=>{ let t=""; try{ t=(new URLSearchParams(location.search).get("table")||"").trim(); }catch(e){}
+  if(!TBL_RE.test(t)){ t=""; try{ t=sessionStorage.getItem("tbl")||""; }catch(e){} }
+  if(!TBL_RE.test(t)) return "";
+  try{ sessionStorage.setItem("tbl",t); if(!sessionStorage.getItem("tblSeen")){ sessionStorage.setItem("tblSeen","1"); track("table_visit",{"Столик":t}); if(window.ym) ym(METRIKA_ID,"params",{"Столики":{[t]:1}}); } }catch(e){}
+  return t; })();
 let searchTimer=null;
 function openCard(i){curIdx=i;renderSheet(i);$("dlg").showModal();
   const p=PRODUCTS[i]; track("card_open",{"Товар":p.name,"Раздел":p.category});
@@ -766,6 +782,7 @@ function applyLang(){
   document.documentElement.lang = lang==="kk" ? "kk" : "ru";
   document.querySelectorAll(".lb").forEach(b=>b.setAttribute("aria-pressed", b.dataset.l===lang));
   $("subtitle").textContent = T("subtitle");
+  $("tblbar").hidden = !TABLE; $("tblbar").textContent = TABLE ? "\u{1FA91} " + T("tbl") + " " + TABLE : "";
   $("upd").textContent = T("updated") + ": " + SETTINGS.updated;
   $("q").placeholder = T("search"); $("q").setAttribute("aria-label", T("search"));
   $("sort").setAttribute("aria-label", T("sort")); $("sortlbl").textContent = T("sort"); $("catlbl").textContent = T("cat"); $("catsel").setAttribute("aria-label", T("cat"));
@@ -969,7 +986,7 @@ function renderCash(){
   const body = ps.length===1
     ? `<div class="one">${esc(tr(ps[0],"name"))}</div><div class="cn">${esc([ps[0].brand,ps[0].weight].filter(Boolean).join(", "))}</div><div class="big">${esc(fmt(ps[0].price))}</div>`
     : `<ul>${ps.map((p,k)=>`<li><span>${esc(tr(p,"name"))}${p.weight?`<small>${esc(p.weight)}</small>`:""}</span><span>${esc(fmt(p.price))}</span><button class="rm" type="button" data-rm="${idx[k]}" aria-label="${esc(T("cashRm"))}">×</button></li>`).join("")}</ul><div class="tot"><span>${esc(T("cashTot"))}</span><b>${esc(fmt(total))}</b></div><p class="cx">${esc(T("cashNote"))}</p>`;
-  $("cash").innerHTML=`<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="cashx"><span>${esc(T("close"))}</span><b>×</b></button></div><div class="cash"><p class="cn">${esc(T("cashHint"))}</p>${body}<button class="clr" type="button" id="cashclr">${esc(T("cashClr"))}</button></div>`;
+  $("cash").innerHTML=`<div class="topbar"><button class="close" type="button" aria-label="${esc(T("close"))}" id="cashx"><span>${esc(T("close"))}</span><b>×</b></button></div><div class="cash">${TABLE?`<p class="tbl">${esc(T("tbl"))} ${esc(TABLE)}</p>`:""}<p class="cn">${esc(T("cashHint"))}</p>${body}<button class="clr" type="button" id="cashclr">${esc(T("cashClr"))}</button></div>`;
   $("cashx").onclick=()=>$("cash").close();
 }
 function openCash(){ renderCash(); if(!$("cash").open && cashList().length){ $("cash").showModal(); track("cashier_open",{"Товаров":cashList().length}); } }
