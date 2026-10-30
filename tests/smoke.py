@@ -46,6 +46,10 @@ with sync_playwright() as p:
         check(f"[{scheme}] список кассира очищается кнопкой", pg.eval_on_selector("#cashrow", "e=>e.hidden"))
         # «Что взять?»
         pg.click("#pickopen"); pg.wait_for_selector("#pk[open]"); pg.keyboard.press("Escape")
+        # «Как это работает»
+        pg.click("#hwopen"); pg.wait_for_selector("#hw[open]")
+        check(f"[{scheme}] «Как это работает» показывает 3 шага", pg.locator("#hw .hwl li").count()==3)
+        pg.keyboard.press("Escape")
         # тема
         before = pg.evaluate("document.documentElement.getAttribute('data-theme')")
         pg.click("#thbtn"); after = pg.evaluate("document.documentElement.getAttribute('data-theme')")
