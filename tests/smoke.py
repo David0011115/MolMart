@@ -192,6 +192,29 @@ with sync_playwright() as p:
     check("настройки недоступны: объявление скрыто", pg.eval_on_selector("#annc", "e=>e.hidden"))
     check("настройки недоступны: нет ошибок JavaScript", not errs, errs[:2])
     c.close()
+    # --- панель «Фильтры» ---
+    for scheme in ("light", "dark"):
+        c = b.new_context(viewport={"width": 390, "height": 800}, color_scheme=scheme, service_workers="block"); pg = c.new_page(); errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)")
+        check(f"[{scheme}] фильтры: панель по умолчанию закрыта", pg.eval_on_selector("#flt", "e=>e.hidden"))
+        check(f"[{scheme}] фильтры: липкая панель компактная (до 80 px)", pg.eval_on_selector("#bar", "e=>e.getBoundingClientRect().height") <= 80, pg.eval_on_selector("#bar", "e=>e.getBoundingClientRect().height"))
+        n0 = pg.locator("#grid .card").count()
+        pg.click("#fbtn"); check(f"[{scheme}] фильтры: кнопка открывает панель", not pg.eval_on_selector("#flt", "e=>e.hidden") and pg.get_attribute("#fbtn", "aria-expanded") == "true")
+        pg.click('#tags .chip >> nth=0'); pg.wait_for_timeout(300)
+        n1 = pg.locator("#grid .card").count()
+        check(f"[{scheme}] фильтры: метка сужает список и на кнопке цифра 1", 0 < n1 < n0 and pg.inner_text("#fbtn").strip().endswith("1"), (n0, n1, pg.inner_text("#fbtn")))
+        pg.click("#freset"); pg.wait_for_timeout(300)
+        check(f"[{scheme}] фильтры: «Сбросить» возвращает всё", pg.locator("#grid .card").count() == n0 and pg.locator("#fbtn b").count() == 0)
+        pg.keyboard.press("Escape"); check(f"[{scheme}] фильтры: Escape закрывает панель", pg.eval_on_selector("#flt", "e=>e.hidden"))
+        pg.click("#fbtn"); pg.mouse.click(195, 790)
+        check(f"[{scheme}] фильтры: клик вне панели закрывает её", pg.eval_on_selector("#flt", "e=>e.hidden"))
+        pg.evaluate("window.scrollTo(0,600)"); pg.wait_for_timeout(200); pg.click("#fbtn")
+        check(f"[{scheme}] фильтры: панель открывается и при прокрутке", pg.is_visible("#flt") and pg.eval_on_selector("#flt", "e=>e.getBoundingClientRect().top") >= 0)
+        pg.click("#fdone"); pg.click('.lb[data-l="kk"]'); pg.click("#fbtn")
+        check(f"[{scheme}] фильтры: на казахском подпись есть", "Сүзгілер" in pg.inner_text("#fbtn") and "Көрсету" in pg.inner_text("#fdone"))
+        check(f"[{scheme}] фильтры: нет ошибок JavaScript", not errs, errs[:2])
+        c.close()
     # --- разбор таблицы без внешней сети: цены, акции, даты, самопроверка ---
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
