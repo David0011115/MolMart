@@ -15,6 +15,7 @@
 <meta name="apple-mobile-web-app-title" content="MolMart">
 <title>Холодильник — товары и цены</title>
 <link rel="preload" href="fonts/Onest-var.woff2" as="font" type="font/woff2" crossorigin>
+<link rel="preload" href="fonts/Unbounded-var.woff2" as="font" type="font/woff2" crossorigin>
 <style>
 /* Шрифты лежат на сайте (папка fonts/): без Google Fonts, работают офлайн. Лицензия OFL — fonts/OFL-*.txt */
 @font-face{font-family:Onest;src:url("fonts/Onest-var.woff2") format("woff2");font-weight:400 700;font-style:normal;font-display:swap}
@@ -486,6 +487,11 @@ const $ = id => document.getElementById(id);
 let ANNC = "", SHINE = true;
 const SS_KEY = "site_settings:" + location.pathname.replace(/[^\/]*$/,"");
 let lang = "ru", cat = "ALL", query = "", activeTags = new Set(), curIdx = -1, sortMode = "def";
+/* Обновление данных «в фоне» (ответила таблица Google): перерисовываем экран только если что-то реально изменилось и без повторной анимации карточек,
+   иначе после показа каталога страница «моргает» и кажется, что она грузится дольше. */
+let GRID_ANIM=true;
+const dataSig=()=>JSON.stringify(PRODUCTS.map(p=>[p.price,p.oldPrice,p.out,p.labels,p.weight,p.composition,p.nutrition,p.allergens,p.kk,p.newSince,p.from,p.to,p.updated]))+"|"+SETTINGS.updated+"|"+JSON.stringify([SETTINGS.title,ANNC,SHOP,BRAND,lang]);
+function softRefresh(prev){ if(dataSig()!==prev){ GRID_ANIM=false; try{ applyLang(); }finally{ GRID_ANIM=true; } } else updateOffline(); }
 try{ const sv = localStorage.getItem("lang"); lang = sv || ((navigator.language||"").toLowerCase().startsWith("kk") ? "kk" : "ru"); }catch(e){}
 if(lang!=="kk") lang="ru";
 const T = k => STR[lang][k];
@@ -862,7 +868,7 @@ function applyLang(){
   $("abopen").hidden = !AB_ON(); $("abopen").setAttribute("aria-label", T("abBtn")); $("abopen").title = T("abBtn");
   updateDemo(); updateAnnc(); updateOffline(); applyThemeBtn();
   $("pickopen").textContent = "\u{1F3B2} " + T("pkBtn"); $("pickrow").hidden = !PRODUCTS.some(p=>!p.hidden&&!p.out);
-  renderChips(); renderGrid(); renderSuggest(); renderShop();
+  renderChips(); renderGrid(GRID_ANIM); renderSuggest(); renderShop();
   if($("ab").open) openAbout();
   if($("hw").open) openHow();
   if($("pk").open) renderPick();
@@ -1137,6 +1143,7 @@ $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic">
 
 let UNKNOWN_ROWS=[], NOT_IN_TABLE=[], DEAD_PROMO=[]; /* строки таблицы без товара на сайте; товары сайта без строки в таблице; акции, которые не сработают (цена акции не ниже обычной) */
 let BAD_PROMO=[]; /* товары, у которых в «Акция до» непонятная дата: акция у них не включается */
+const PRICES_GRACE_MS=1000; /* сколько ждём таблицу Google перед первым показом, если запасной файл уже есть */
 let PRICES_JOB=Promise.resolve(), PRICES_STALE=false; /* PRICES_JOB: ждёт ответа таблицы; PRICES_STALE: таблица не ответила, показаны сохранённые цены */
 let PRICES_SRC="none", PRICES_WHY=""; /* PRICES_WHY: почему не открылась таблица цен (идёт в «Логи проверки»), например «не уложились в 4 с» */
 /* ===== Самопроверка: раз в сутки с устройства, отправляет итог в лист «Логи проверки» (см. скрипт Проверки.gs) =====
@@ -1196,15 +1203,18 @@ async function loadPrices(){
   try{
     /* Порядок: запасной prices.csv лежит на нашем сайте и отвечает быстро, поэтому показываем цены из него сразу.
        Таблицу Google читаем параллельно (до 8 с) и, когда она ответит, обновляем цены на экране. Покупатель не ждёт Google. */
-    PRICES_SRC="none"; PRICES_WHY=""; PRICES_STALE=false;
+    PRICES_SRC="none"; PRICES_WHY=""; PRICES_STALE=false; const t0=Date.now();
     const sheetJob = !SETTINGS.pricesSheet ? Promise.resolve() :
-      get(SETTINGS.pricesSheet,8000).then(t=>{ if(t){ applyPrices(t); PRICES_SRC="sheet"; PRICES_STALE=false; } },
+      get(SETTINGS.pricesSheet,8000).then(t=>{ if(t){ const prev=dataSig(); applyPrices(t); PRICES_SRC="sheet"; PRICES_STALE=false; softRefresh(prev); } },
                                           e=>{ PRICES_WHY=String(e&&e.message||"неизвестно"); })
-      .then(()=>{ PRICES_STALE = !!SETTINGS.pricesSheet && PRICES_SRC!=="sheet"; if(PRICES_SRC==="sheet"||PRICES_STALE) applyLang(); });
+      .then(()=>{ if(PRICES_SRC!=="sheet"){ PRICES_STALE = !!SETTINGS.pricesSheet; updateOffline(); } });
     PRICES_JOB = sheetJob;
     let file=""; try{ file=await get(SETTINGS.pricesFile,4000); }catch(e){}
     if(file && PRICES_SRC!=="sheet"){ applyPrices(file); PRICES_SRC="file"; }
     if(PRICES_SRC==="none") await sheetJob;   /* запасного файла нет: ждём таблицу */
+    else if(PRICES_SRC==="file" && SETTINGS.pricesSheet){   /* короткая отсрочка: обычно таблица отвечает быстро, и покупатель сразу видит свежие цены, а не старые из файла на долю секунды */
+      const left=Math.max(0,PRICES_GRACE_MS-(Date.now()-t0)); if(left) await Promise.race([sheetJob,new Promise(r=>setTimeout(r,left))]);
+    }
   }catch(e){}
 }
 
@@ -1235,7 +1245,7 @@ async function loadDescriptions(){
     DESC_SRC="none"; DESC_WHY="";
     const url=(SETTINGS.productsGid && SETTINGS.pricesSheet) ? SETTINGS.pricesSheet.replace(/gid=\d+/,"gid="+SETTINGS.productsGid) : "";
     DESC_JOB = !url ? Promise.resolve() :
-      getCsv(url,8000).then(t=>{ if(t){ applyDescriptions(t); DESC_SRC="sheet"; applyLang(); } }, e=>{ DESC_WHY=String(e&&e.message||"неизвестно"); });
+      getCsv(url,8000).then(t=>{ if(t){ const prev=dataSig(); applyDescriptions(t); DESC_SRC="sheet"; softRefresh(prev); } }, e=>{ DESC_WHY=String(e&&e.message||"неизвестно"); });
     if(SETTINGS.productsFile){
       let file=""; try{ file=await getCsv(SETTINGS.productsFile,4000); }catch(e){}
       if(file && DESC_SRC!=="sheet"){ applyDescriptions(file); DESC_SRC="file"; }
@@ -1272,14 +1282,18 @@ async function loadSiteSettings(){
       try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
         const t=r.ok?await r.text():""; if(/параметр/i.test(t.split("\n")[0]||"")) text=t; }catch(e){} finally{ clearTimeout(to); }
     }
-    if(text){ try{ localStorage.setItem(SS_KEY,text); }catch(e){} }
-    if(text){ applySiteSettings(text); applyBrand(); }
+    if(!text) return;
+    let cached=null; try{ cached=localStorage.getItem(SS_KEY); }catch(e){}
+    if(text===cached) return;   /* такие настройки уже применены из сохранённой копии при запуске */
+    try{ localStorage.setItem(SS_KEY,text); }catch(e){}
+    const prev=dataSig(); applySiteSettings(text); applyBrand(); softRefresh(prev);
   }catch(e){}
 }
 window.addEventListener("offline",updateOffline);
 window.addEventListener("online",async()=>{ await Promise.all([loadDescriptions(),loadPrices(),loadSiteSettings()]); applyLang(); });
 (async()=>{
-  await Promise.all([loadDescriptions(),loadPrices(),loadSiteSettings()]);
+  loadSiteSettings();   /* настройки из Google не задерживают показ каталога: при запуске уже применена сохранённая копия */
+  await Promise.all([loadDescriptions(),loadPrices()]);
   applyLang();
   (window.requestIdleCallback||(f=>setTimeout(f,300)))(()=>{ try{ window.__loadMetrika&&window.__loadMetrika(); }catch(e){} },{timeout:2500});
   setTimeout(()=>runCheck(),6000);
