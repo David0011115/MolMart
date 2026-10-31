@@ -216,6 +216,27 @@ with sync_playwright() as p:
         check(f"[{scheme}] фильтры: на казахском подпись есть", "Сүзгілер" in pg.inner_text("#fbtn") and "Көрсету" in pg.inner_text("#fdone"))
         check(f"[{scheme}] фильтры: нет ошибок JavaScript", not errs, errs[:2])
         c.close()
+    # --- метки, подпись и цвет темы из config.js ---
+    CFG = open(os.path.join(ROOT, "config.js"), encoding="utf-8").read()
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    CFG2 = CFG + '\nconst LABELS_CFG = {vegan:{ru:"Веган",kk:"Вегандық",color:"#2e7d32",icon:"V"}, bad:{ru:""}, "Плохой Ключ":{ru:"x"}, fav:{ru:"взлом"}};\n'
+    CFG2 = CFG2.replace('const FOOTER_SIGN = "Made by Рурак Д. · 2026";', 'const FOOTER_SIGN = "Сделано для кафе «Тест»";').replace('const THEME_COLORS = ["#fbf4e6", "#0c1a1f"];', 'const THEME_COLORS = ["#ffffff", "#000000"];')
+    pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG2))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_SRC!=='none'")
+    names = pg.evaluate("PRODUCTS.map(p=>p.name)")
+    pg.evaluate("t=>applyPrices(t)", "Товар,Цена,Метки\n\"%s\",600,\"Веган, Хит\"\n" % names[0]); pg.evaluate("applyLang()")
+    check("метки: своя метка «Веган» читается из таблицы", pg.evaluate("PRODUCTS[0].labels") == ["vegan", "hit"], pg.evaluate("PRODUCTS[0].labels"))
+    check("метки: служебные и неправильные ключи из config.js игнорируются", pg.evaluate("Object.keys(LABELS)") == ["halal", "new", "hit", "sale", "spicy", "vegan", "fav", "stock"], pg.evaluate("Object.keys(LABELS)"))
+    check("метки: служебную «Избранное» подменить нельзя", pg.evaluate("LABELS.fav.ru") != "взлом")
+    rib = pg.locator("#grid .card >> nth=0").locator(".rib.r-vegan")
+    check("метки: лента «Веган» с цветом и значком на карточке", rib.count() == 1 and rib.evaluate("e=>getComputedStyle(e,'::before').content") == '"V"' and "rgb(46, 125, 50)" in rib.evaluate("e=>getComputedStyle(e).backgroundColor"), (rib.count(), rib.inner_text(), rib.evaluate("e=>getComputedStyle(e).backgroundColor")))
+    pg.click("#fbtn")
+    check("метки: «Веган» есть среди фильтров", "Веган" in pg.inner_text("#tags"))
+    check("подпись: берётся из config.js", "Сделано для кафе «Тест»" in pg.inner_text("#footer") and "Рурак" not in pg.inner_text("#footer"))
+    check("цвет темы: берётся из config.js", pg.evaluate("[...document.querySelectorAll('meta[name=theme-color]')].map(m=>m.content)") == ["#ffffff", "#000000"])
+    check("метки: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
     # --- разбор таблицы без внешней сети: цены, акции, даты, самопроверка ---
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
@@ -296,6 +317,20 @@ with sync_playwright() as p:
     pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_STALE===true", timeout=5000)
     check("загрузка: таблица недоступна — плашка и причина", not pg.eval_on_selector("#offline", "e=>e.hidden") and "503" in pg.evaluate("PRICES_WHY"), pg.evaluate("PRICES_WHY"))
     c.close()
+    # --- все папки заказчиков из tools/clients.json: код совпадает с корнем и страница открывается ---
+    import json
+    root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    root_sw = open(os.path.join(ROOT, "sw.js"), encoding="utf-8").read()
+    for cl in json.load(open(os.path.join(ROOT, "tools", "clients.json"), encoding="utf-8")):
+        d = cl["dir"]; want = root_src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">', 1) if cl.get("noindex") else root_src
+        check(f"заказчик {d}: index.html совпадает с корнем (запусти tools/sync_clients.py)", want == open(os.path.join(ROOT, d, "index.html"), encoding="utf-8").read())
+        check(f"заказчик {d}: sw.js совпадает с корнем", root_sw == open(os.path.join(ROOT, d, "sw.js"), encoding="utf-8").read())
+        check(f"заказчик {d}: свои файлы на месте", all(os.path.exists(os.path.join(ROOT, d, f)) for f in ("config.js", "products.js", "manifest.json")))
+        c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.goto(BASE + d + "/index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=8000)
+        check(f"заказчик {d}: каталог открывается без ошибок", pg.locator("#grid .card").count() > 0 and not errs, errs[:2])
+        c.close()
     b.close()
 
 print("\nИтог:", "всё в порядке" if not fails else f"упало {len(fails)}: " + "; ".join(fails))

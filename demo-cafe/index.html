@@ -116,6 +116,8 @@ dialog.zm::after{content:"×";position:fixed;top:10px;right:18px;color:#fff;font
 .r-sale{background:#d93a3a}.r-sale::before{content:"%"}
 .r-spicy{background:#9c1c2c}.r-spicy::before{content:"\1F336"}
 .rib i{font-style:normal}
+.rib.ic::before{content:attr(data-ic)}
+.rib:not(.r-new):not(.r-hit):not(.r-sale):not(.r-spicy){background:#5b6b73}
 .selrow{display:grid;grid-template-columns:1fr 1fr;gap:8px}
 .sel{display:flex;flex-direction:column;gap:3px;min-width:0}
 .sel span{font:600 12px Onest,system-ui,sans-serif;color:var(--muted);padding-left:4px}
@@ -439,15 +441,24 @@ dialog.zm img{max-width:100%;max-height:100%;object-fit:contain;cursor:zoom-out}
 <script src="products.js"></script>
 <script>
 /* Метки: добавьте в товар labels:["halal","new","hit","sale"] */
-const LABELS = {
+const LABELS_CORE = {
   halal:{ru:"Халал",kk:"Халал"},
   new:{ru:"Новинка",kk:"Жаңа"},
   hit:{ru:"Хит",kk:"Хит"},
   sale:{ru:"Акция",kk:"Акция"},
-  spicy:{ru:"Острое",kk:"Ащы"},
-  fav:{ru:"♥ Избранное",kk:"♥ Таңдаулы"},   /* служебный фильтр: показывается, пока у покупателя есть избранное */
-  stock:{ru:"В наличии",kk:"Қолда бар"}   /* служебный фильтр: прячет товары «Нет в наличии», показывается, пока есть такие товары */
+  spicy:{ru:"Острое",kk:"Ащы"}
 };
+const LABELS_SERVICE = {   /* служебные фильтры, из config.js не меняются */
+  fav:{ru:"♥ Избранное",kk:"♥ Таңдаулы"},   /* показывается, пока у покупателя есть избранное */
+  stock:{ru:"В наличии",kk:"Қолда бар"}   /* прячет товары «Нет в наличии», показывается, пока такие есть */
+};
+/* Свои метки и новые названия/цвета берутся из LABELS_CFG в config.js (необязательно): ключ латиницей, ru, kk, color "#rrggbb", icon (1–2 символа) */
+const LABELS_USER = (()=>{ const o={}, c=(typeof LABELS_CFG==="object" && LABELS_CFG) || {};
+  for(const k of Object.keys(c)){ const v=c[k]; if(!/^[a-z][a-z0-9_]{0,20}$/.test(k) || k in LABELS_SERVICE || !v || typeof v.ru!=="string" || !v.ru.trim()) continue;
+    o[k]={ru:v.ru.trim().slice(0,24), kk:(typeof v.kk==="string" && v.kk.trim() ? v.kk.trim() : v.ru.trim()).slice(0,24),
+           color:/^#[0-9a-f]{6}$/i.test(v.color||"")?v.color:"", icon:typeof v.icon==="string"?[...v.icon].slice(0,2).join(""):""}; }
+  return o; })();
+const LABELS = Object.assign({}, LABELS_CORE, LABELS_USER, LABELS_SERVICE);
 
 const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
@@ -595,7 +606,8 @@ function pic(p){return p.image ? `<img src="${esc(p.image)}" alt="${esc(tr(p,"na
 function badges(p){
   const ls = p.labels||[]; if(!ls.length) return "";
   const h = ls.includes("halal") ? `<span class="seal" role="img" aria-label="${esc(lbl("halal"))}"><svg viewBox="0 0 24 24" width="20" height="20" aria-hidden="true"><path fill="#fff" d="M15.5 3.2a9 9 0 1 0 0 17.6A7.4 7.4 0 0 1 15.5 3.2z"/><path fill="#fff" d="M18.2 8.2l.9 1.9 2 .3-1.5 1.4.4 2-1.8-1-1.8 1 .4-2-1.5-1.4 2-.3z"/></svg><i>${esc(lbl("halal"))}</i></span>` : "";
-  const r = ls.filter(k=>k!=="halal").map(k=>`<span class="rib r-${esc(k)}" title="${esc(lbl(k))}"><i>${esc(lbl(k))}</i></span>`).join("");
+  const r = ls.filter(k=>k!=="halal" && LABELS[k]).map(k=>{ const L=LABELS[k]||{}, ic=L.icon || (k in LABELS_CORE ? "" : "●");   /* значок собственной метки рисуется через ::before: на узких карточках текст ленты скрыт, остаётся значок */
+    return `<span class="rib r-${esc(k)}${ic?" ic":""}"${ic?` data-ic="${esc(ic)}"`:""}${L.color?` style="background:${esc(L.color)}"`:""} title="${esc(lbl(k))}"><i>${esc(lbl(k))}</i></span>`; }).join("");
   return h + (r ? `<div class="ribs">${r}</div>` : "");
 }
 
@@ -845,7 +857,7 @@ function applyLang(){
   $("sort").setAttribute("aria-label", T("sort")); $("sortlbl").textContent = T("sort"); $("catlbl").textContent = T("cat"); $("catsel").setAttribute("aria-label", T("cat"));
   $("sort").innerHTML = [["def","sd"],["asc","sa"],["desc","sdsc"]].map(([v,k])=>`<option value="${v}"${v===sortMode?" selected":""}>${esc(T(k))}</option>`).join("");
   $("empty").innerHTML = esc(T("empty")) + (SG_ON() ? ` <button class="lnk" id="sgq" type="button">${esc(T("sgEmptyBtn"))}</button>` : "");
-  $("footer").innerHTML = esc(T("footer")) + `<div><button class="lnk" id="hwopen" type="button">${esc(T("hwLink"))}</button></div><div class="dev">Made by Рурак Д. · 2026</div>`;
+  $("footer").innerHTML = esc(T("footer")) + `<div><button class="lnk" id="hwopen" type="button">${esc(T("hwLink"))}</button></div>${(typeof FOOTER_SIGN==="string"?FOOTER_SIGN:"Made by Рурак Д. · 2026")?`<div class="dev">${esc(typeof FOOTER_SIGN==="string"?FOOTER_SIGN:"Made by Рурак Д. · 2026")}</div>`:""}`;
   $("dlg").setAttribute("aria-label", T("dlg"));
   document.title = SETTINGS.title + " — " + (lang==="kk" ? "тауарлар мен бағалар" : "товары и цены");
   $("abopen").hidden = !AB_ON(); $("abopen").setAttribute("aria-label", T("abBtn")); $("abopen").title = T("abBtn");
@@ -1083,7 +1095,7 @@ function openCompare(i){
   renderCompare(); if(!$("cmp").open){ $("cmp").showModal(); track("compare_open",{"Товар":PRODUCTS[i].name}); }
 }
 /* ===== Переключатель темы: по умолчанию как на телефоне, кнопка включает принудительно ===== */
-const THEME_META = ["#fbf4e6","#0c1a1f"];
+const THEME_META = (typeof THEME_COLORS==="object" && Array.isArray(THEME_COLORS) && THEME_COLORS.length===2 && THEME_COLORS.every(c=>/^#[0-9a-f]{6}$/i.test(c))) ? THEME_COLORS : ["#fbf4e6","#0c1a1f"];
 function themeIsDark(){ const t=document.documentElement.getAttribute("data-theme"); return t ? t==="dark" : !!(window.matchMedia && matchMedia("(prefers-color-scheme: dark)").matches); }
 function applyThemeBtn(){
   const dark=themeIsDark(), b=$("thbtn"), name=dark?T("thLight"):T("thDark");
