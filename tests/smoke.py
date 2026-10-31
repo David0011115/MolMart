@@ -23,6 +23,7 @@ with sync_playwright() as p:
     def new_context(**kw):
         ctx = _new_context(**kw)
         ctx.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=PRICES_LOCAL))
+        ctx.route(re.compile(r"docs\.google\.com/.*gid=777000555"), lambda r: r.abort())   # лист «Товары» недоступен: берётся products.csv
         return ctx
     b.new_context = new_context
     for scheme in ("light", "dark"):
@@ -245,6 +246,39 @@ with sync_playwright() as p:
     check("самопроверка: лишняя строка таблицы названа", pg.evaluate("UNKNOWN_ROWS") == ["Такого товара нет на сайте"])
     check("самопроверка: товары без строки в таблице названы", len(pg.evaluate("NOT_IN_TABLE")) == len(names) - 6 and names[6] in pg.evaluate("NOT_IN_TABLE"))
     check("разбор: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    # --- лист «Товары»: описания из таблицы и запасной products.csv ---
+    CFG = open(os.path.join(ROOT, "config.js"), encoding="utf-8").read()
+    def desc_csv(rows):
+        return "Товар,Вес,Состав,КБЖУ,Аллергены,Название (каз),Состав (каз),КБЖУ (каз),Аллергены (каз)\n" + "\n".join(",".join('"%s"' % x for x in r) for r in rows) + "\n"
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.route("**/products.csv*", lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=desc_csv([["__N0__", "123 г", "Тестовый состав из файла", "", "Молоко", "", "", "", ""]])))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("DESC_SRC!=='none'")
+    n0, n1 = pg.evaluate("[PRODUCTS[0].name, PRODUCTS[1].name]")
+    pg.unroute("**/products.csv*")
+    pg.route("**/products.csv*", lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=desc_csv([[n0, "123 г", "Тестовый состав из файла", "", "Молоко", "Қазақша атау", "", "", ""], ["Нет такого товара", "1 г", "", "", "", "", "", "", ""]])))
+    pg.reload(); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("DESC_SRC==='file'")
+    got = pg.evaluate("(()=>{const p=PRODUCTS[0],q=PRODUCTS[1];return {w:p.weight,c:p.composition,a:p.allergens,kn:p.kk.name,kc:p.kk.composition,qc:q.composition}})()")
+    check("«Товары»: запасной products.csv подставляет вес, состав, аллергены", got["w"] == "123 г" and got["c"] == "Тестовый состав из файла" and got["a"] == "Молоко", got)
+    check("«Товары»: казахское название из файла", got["kn"] == "Қазақша атау", got)
+    check("«Товары»: пустые ячейки оставляют значения из products.js", got["kc"] and got["qc"] != "Тестовый состав из файла", got)
+    check("«Товары»: строка с неизвестным названием названа", pg.evaluate("DESC_UNKNOWN") == ["Нет такого товара"])
+    pg.click("#grid .card >> nth=0"); pg.wait_for_selector("#dlg[open]")
+    t = pg.inner_text("#dlg")
+    check("«Товары»: в карточке видны состав и блок «Аллергены»", "Тестовый состав из файла" in t and "Аллергены" in t and "Молоко" in t and "123 г" in t, t[:200])
+    pg.evaluate("t=>applyDescriptions(t)", desc_csv([[n0, "", "", "", "", "", "", "", ""]]))
+    check("«Товары»: очищенная ячейка возвращает текст из products.js", pg.evaluate("PRODUCTS[0].composition") != "Тестовый состав из файла" and pg.evaluate("PRODUCTS[0].weight") != "123 г")
+    check("«Товары»: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); held = []
+    pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="application/javascript", body=re.sub(r'productsGid:\s*"\d*"', 'productsGid: "999"', CFG)))
+    pg.route(re.compile(r"docs\.google\.com/.*gid=999"), lambda r: held.append(r))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=5000)
+    n0 = pg.evaluate("PRODUCTS[0].name")
+    held[0].fulfill(status=200, content_type="text/csv; charset=utf-8", body=desc_csv([[n0, "999 г", "Состав из таблицы", "", "", "", "", "", ""]]))
+    pg.wait_for_function("DESC_SRC==='sheet'", timeout=5000)
+    check("«Товары»: лист из Google обновляет описание после показа каталога", pg.evaluate("PRODUCTS[0].weight") == "999 г" and pg.evaluate("PRODUCTS[0].composition") == "Состав из таблицы")
     c.close()
     # --- порядок загрузки: цены из запасного файла сразу, таблица Google позже ---
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); held = []

@@ -159,7 +159,8 @@ def set_output(changed):
             f.write("changed=%s\n" % ("true" if changed else "false"))
 
 
-def main():
+def update_prices():
+    """Возвращает True, если prices.csv изменился."""
     old_raw = open(TARGET, "rb").read()
     old_rows = read_rows(old_raw.decode("utf-8-sig"))
     new_rows = build(old_rows, fetch(sheet_url()))
@@ -179,14 +180,75 @@ def main():
     new_raw = serialize(new_rows)
     if new_raw == old_raw:
         print("Изменений нет, prices.csv не трогаем.")
-        set_output(False)
-        return
+        return False
     with open(TARGET, "wb") as f:
         f.write(new_raw)
     print("prices.csv обновлён. Что изменилось:")
     for line in summary(old_rows, new_rows) or ["(только порядок строк или служебные колонки)"]:
         print("  " + line)
-    set_output(True)
+    return True
+
+
+PRODUCTS_FILE = os.path.join(ROOT, "products.csv")
+PRODUCTS_HEADER = ["Товар", "Вес", "Состав", "КБЖУ", "Аллергены", "Название (каз)", "Состав (каз)", "КБЖУ (каз)", "Аллергены (каз)"]
+
+
+def products_url():
+    """Адрес листа «Товары»: тот же файл таблицы, другой gid. Пусто, если productsGid в config.js не задан."""
+    src = os.environ.get("PRODUCTS_SOURCE", "").strip()
+    if src:
+        return src
+    cfg = open(os.path.join(ROOT, "config.js"), encoding="utf-8").read()
+    gid = re.search(r'productsGid\s*:\s*"(\d*)"', cfg)
+    if not gid or not gid.group(1):
+        return ""
+    return re.sub(r"gid=\d+", "gid=" + gid.group(1), sheet_url())
+
+
+def update_products():
+    """Запасная копия листа «Товары» -> products.csv. Возвращает True, если файл изменился. Без productsGid ничего не делает."""
+    url = products_url()
+    if not url:
+        print("Лист «Товары» не подключён (productsGid пуст), products.csv не трогаем.")
+        return False
+    rows = read_rows(fetch(url))
+    if len(rows) < 2:
+        fail("в листе «Товары» нет строк, products.csv не обновлён")
+    head = [h.strip().lower() for h in rows[0]]
+    if "товар" not in head:
+        fail("в листе «Товары» нет колонки «Товар» (пришло не то, что нужно): %r" % rows[0][:6])
+    idx = {h: i for i, h in enumerate(head)}
+    out = [PRODUCTS_HEADER]
+    for r in rows[1:]:
+        name = r[idx["товар"]].strip() if idx["товар"] < len(r) else ""
+        if not name:
+            continue
+        out.append([(r[idx[h.lower()]].strip() if h.lower() in idx and idx[h.lower()] < len(r) else "") for h in PRODUCTS_HEADER])
+    old_raw = open(PRODUCTS_FILE, "rb").read() if os.path.exists(PRODUCTS_FILE) else b""
+    old_n = max(0, len(read_rows(old_raw.decode("utf-8-sig"))) - 1) if old_raw else 0
+    print("описаний товаров: было %d, стало %d" % (old_n, len(out) - 1))
+    if os.environ.get("FORCE", "").strip() not in ("1", "true") and old_n >= 10 and len(out) - 1 < old_n * MIN_KEEP:
+        fail("строк в листе «Товары» стало слишком мало (%d из %d), products.csv не обновлён. Если так и задумано, запустите вручную с force" % (len(out) - 1, old_n))
+    new_raw = serialize(out)
+    if new_raw == old_raw:
+        print("Изменений нет, products.csv не трогаем.")
+        return False
+    with open(PRODUCTS_FILE, "wb") as f:
+        f.write(new_raw)
+    print("products.csv обновлён.")
+    return True
+
+
+def main():
+    changed = update_prices()
+    products_error = None
+    try:   # сбой листа «Товары» не должен мешать сохранить уже обновлённые цены
+        changed = update_products() or changed
+    except SystemExit as e:
+        products_error = e.code
+    set_output(changed)
+    if products_error:
+        sys.exit(products_error)
 
 
 if __name__ == "__main__":

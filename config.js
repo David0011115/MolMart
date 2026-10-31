@@ -10,6 +10,8 @@ const SETTINGS = {
   updated: "24.10.2026",  /* запасная дата, если в prices.csv колонка «Изменено» пустая */
   pricesFile: "prices.csv", /* запасная таблица цен в репозитории */
   pricesSheet: "https://docs.google.com/spreadsheets/d/e/2PACX-1vTk7FDojlhKMCJh2NyYePtZnVX7Q7t3yW9qjATTRVe1WBB7EoDIeRBbU1TviOMe-PQf1JIoo0LLZlA-/pub?gid=392017231&single=true&output=csv"          /* ссылка на опубликованную Google Таблицу (CSV); если пусто или недоступна — берётся pricesFile */,
+  productsFile: "products.csv", /* запасная копия листа «Товары» (вес, состав, КБЖУ, аллергены, перевод) */
+  productsGid: "777000555",  /* номер листа «Товары» в той же таблице; пусто = лист не читается, описания берутся из products.js */
   settingsGid: "777000444"  /* номер листа «Настройки» в той же таблице (число после gid= в его адресе); пусто = лист не читается */
 };
 

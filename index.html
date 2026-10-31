@@ -1152,8 +1152,11 @@ async function runCheck(force){
     if(noKk.length>3) probs.push("нет казахского названия у "+noKk.length+" из "+vis.length+" товаров");
     else noKk.forEach(p=>probs.push("нет казахского названия: "+p.name));
     if(BAD_PROMO.length) probs.push("непонятная дата в «Акция до», акция не включена: "+BAD_PROMO.slice(0,5).join(", ")+(BAD_PROMO.length>5?" и ещё "+(BAD_PROMO.length-5):""));
+    try{ await DESC_JOB; }catch(e){}
     const few=a=>a.slice(0,5).join(", ")+(a.length>5?" и ещё "+(a.length-5):"");
     if(NOT_IN_TABLE.length) probs.push("товара нет в таблице (или название не совпало): "+few(NOT_IN_TABLE));
+    if(SETTINGS.productsGid && DESC_SRC!=="sheet") probs.push("лист «Товары» недоступен, показаны сохранённые описания"+(DESC_WHY?" ("+DESC_WHY.replace(/[|]/g," ").slice(0,60)+")":""));
+    if(DESC_UNKNOWN.length) probs.push("в листе «Товары» есть строка, которой нет на сайте: "+few(DESC_UNKNOWN));
     if(UNKNOWN_ROWS.length) probs.push("в таблице есть строка, которой нет на сайте: "+few(UNKNOWN_ROWS));
     if(DEAD_PROMO.length) probs.push("акция не сработает (акционная цена не ниже обычной или нет обычной цены): "+few(DEAD_PROMO));
     const noPrice=vis.filter(p=>!p.out && !(p.price>0));
@@ -1164,18 +1167,21 @@ async function runCheck(force){
     return probs;
   }catch(e){}
 }
+/* getCsv: читает CSV и бросает ошибку с понятной причиной: таймаут, код ответа, «не таблица», сеть */
+async function getCsv(url,ms,head=/товар/i){
+  const ctl=new AbortController(), t0=Date.now(), to=setTimeout(()=>ctl.abort(),ms); const sec=()=>((Date.now()-t0)/1000).toFixed(1)+" с";
+  try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
+    if(!r.ok) throw new Error("код ответа "+r.status+", "+sec());
+    const t=await r.text(); if(!head.test(t.split("\n")[0]||"")) throw new Error("пришло не то, что нужно (не CSV), "+sec());
+    return t;
+  }catch(e){ if(e&&e.name==="AbortError") throw new Error("не уложились в "+(ms/1000)+" с");
+    if(e&&/^(код ответа|пришло не)/.test(e.message||"")) throw e;
+    throw new Error("сеть: запрос не прошёл, "+sec()); }
+  finally{ clearTimeout(to); }
+}
+const get=getCsv;
 async function loadPrices(){
   try{
-    /* get бросает ошибку с понятной причиной: таймаут, код ответа, «не таблица», сеть; причину для таблицы цен запоминаем в PRICES_WHY */
-    const get=async(url,ms)=>{ const ctl=new AbortController(), t0=Date.now(), to=setTimeout(()=>ctl.abort(),ms); const sec=()=>((Date.now()-t0)/1000).toFixed(1)+" с";
-      try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
-        if(!r.ok) throw new Error("код ответа "+r.status+", "+sec());
-        const t=await r.text(); if(!/товар/i.test(t.split("\n")[0]||"")) throw new Error("пришло не то, что нужно (не CSV), "+sec());
-        return t;
-      }catch(e){ if(e&&e.name==="AbortError") throw new Error("не уложились в "+(ms/1000)+" с");
-        if(e&&/^(код ответа|пришло не)/.test(e.message||"")) throw e;
-        throw new Error("сеть: запрос не прошёл, "+sec()); }
-      finally{ clearTimeout(to); } };
     /* Порядок: запасной prices.csv лежит на нашем сайте и отвечает быстро, поэтому показываем цены из него сразу.
        Таблицу Google читаем параллельно (до 8 с) и, когда она ответит, обновляем цены на экране. Покупатель не ждёт Google. */
     PRICES_SRC="none"; PRICES_WHY=""; PRICES_STALE=false;
@@ -1187,6 +1193,41 @@ async function loadPrices(){
     let file=""; try{ file=await get(SETTINGS.pricesFile,4000); }catch(e){}
     if(file && PRICES_SRC!=="sheet"){ applyPrices(file); PRICES_SRC="file"; }
     if(PRICES_SRC==="none") await sheetJob;   /* запасного файла нет: ждём таблицу */
+  }catch(e){}
+}
+
+/* ===== ЛИСТ «ТОВАРЫ» (Google Таблица): вес, состав, КБЖУ, аллергены и казахский перевод =====
+   Колонки: Товар (как в products.js), Вес, Состав, КБЖУ, Аллергены, Название (каз), Состав (каз), КБЖУ (каз), Аллергены (каз).
+   Непустая ячейка заменяет значение из products.js, пустая оставляет его. Новые товары лист не создаёт: строка с неизвестным названием игнорируется
+   (самопроверка о ней сообщит). Запасная копия: products.csv в репозитории. Лист читается так же, как «Цены»: сначала файл, таблица параллельно. */
+let DESC_UNKNOWN=[], DESC_SRC="none", DESC_WHY="", DESC_JOB=Promise.resolve();
+const DESC_FIELDS=[["вес","weight"],["состав","composition"],["кбжу","nutrition"],["аллергены","allergens"]];
+const DESC_FIELDS_KK=[["название (каз)","name"],["состав (каз)","composition"],["кбжу (каз)","nutrition"],["аллергены (каз)","allergens"]];
+function applyDescriptions(text){
+  const rows=parseCSV(text,false).filter(r=>r.some(x=>x.trim())); if(rows.length<2) return;
+  const h=rows[0].map(x=>x.trim().toLowerCase()), iN=h.indexOf("товар"); if(iN<0) return;
+  DESC_UNKNOWN=[];
+  for(const p of PRODUCTS){   /* сначала возвращаем значения из products.js: если ячейку очистили, старый текст из прошлой копии не остаётся */
+    if(!p._b) p._b={weight:p.weight,composition:p.composition,nutrition:p.nutrition,allergens:p.allergens,kk:Object.assign({},p.kk||{})};
+    p.weight=p._b.weight; p.composition=p._b.composition; p.nutrition=p._b.nutrition; p.allergens=p._b.allergens; p.kk=Object.assign({},p._b.kk);
+  }
+  for(const r of rows.slice(1)){
+    const nm=(r[iN]||"").trim(); if(!nm) continue;
+    const p=PRODUCTS.find(x=>x.name===nm); if(!p){ DESC_UNKNOWN.push(nm); continue; }
+    for(const [col,f] of DESC_FIELDS){ const i=h.indexOf(col), v=i>=0?(r[i]||"").trim():""; if(v) p[f]=v; }
+    for(const [col,f] of DESC_FIELDS_KK){ const i=h.indexOf(col), v=i>=0?(r[i]||"").trim():""; if(v){ p.kk=p.kk||{}; p.kk[f]=v; } }
+  }
+}
+async function loadDescriptions(){
+  try{
+    DESC_SRC="none"; DESC_WHY="";
+    const url=(SETTINGS.productsGid && SETTINGS.pricesSheet) ? SETTINGS.pricesSheet.replace(/gid=\d+/,"gid="+SETTINGS.productsGid) : "";
+    DESC_JOB = !url ? Promise.resolve() :
+      getCsv(url,8000).then(t=>{ if(t){ applyDescriptions(t); DESC_SRC="sheet"; applyLang(); } }, e=>{ DESC_WHY=String(e&&e.message||"неизвестно"); });
+    if(SETTINGS.productsFile){
+      let file=""; try{ file=await getCsv(SETTINGS.productsFile,4000); }catch(e){}
+      if(file && DESC_SRC!=="sheet"){ applyDescriptions(file); DESC_SRC="file"; }
+    }
   }catch(e){}
 }
 /* ===== ЛИСТ «НАСТРОЙКИ» (Google Таблица) =====
@@ -1224,9 +1265,9 @@ async function loadSiteSettings(){
   }catch(e){}
 }
 window.addEventListener("offline",updateOffline);
-window.addEventListener("online",async()=>{ await Promise.all([loadPrices(),loadSiteSettings()]); applyLang(); });
+window.addEventListener("online",async()=>{ await Promise.all([loadDescriptions(),loadPrices(),loadSiteSettings()]); applyLang(); });
 (async()=>{
-  await Promise.all([loadPrices(),loadSiteSettings()]);
+  await Promise.all([loadDescriptions(),loadPrices(),loadSiteSettings()]);
   applyLang();
   (window.requestIdleCallback||(f=>setTimeout(f,300)))(()=>{ try{ window.__loadMetrika&&window.__loadMetrika(); }catch(e){} },{timeout:2500});
   setTimeout(()=>runCheck(),6000);
