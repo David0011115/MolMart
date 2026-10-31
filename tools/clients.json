@@ -1,0 +1,4 @@
+[
+  {"dir": "demo", "noindex": true, "note": "демо для показа заказчикам (магазин)"},
+  {"dir": "demo-cafe", "noindex": true, "note": "демо для кафе"}
+]

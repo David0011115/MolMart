@@ -23,6 +23,7 @@ with sync_playwright() as p:
     def new_context(**kw):
         ctx = _new_context(**kw)
         ctx.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=PRICES_LOCAL))
+        ctx.route(re.compile(r"docs\.google\.com/.*gid=777000555"), lambda r: r.abort())   # лист «Товары» недоступен: берётся products.csv
         return ctx
     b.new_context = new_context
     for scheme in ("light", "dark"):
@@ -192,6 +193,144 @@ with sync_playwright() as p:
     check("настройки недоступны: объявление скрыто", pg.eval_on_selector("#annc", "e=>e.hidden"))
     check("настройки недоступны: нет ошибок JavaScript", not errs, errs[:2])
     c.close()
+    # --- панель «Фильтры» ---
+    for scheme in ("light", "dark"):
+        c = b.new_context(viewport={"width": 390, "height": 800}, color_scheme=scheme, service_workers="block"); pg = c.new_page(); errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)")
+        check(f"[{scheme}] фильтры: панель по умолчанию закрыта", pg.eval_on_selector("#flt", "e=>e.hidden"))
+        check(f"[{scheme}] фильтры: липкая панель компактная (до 80 px)", pg.eval_on_selector("#bar", "e=>e.getBoundingClientRect().height") <= 80, pg.eval_on_selector("#bar", "e=>e.getBoundingClientRect().height"))
+        n0 = pg.locator("#grid .card").count()
+        pg.click("#fbtn"); check(f"[{scheme}] фильтры: кнопка открывает панель", not pg.eval_on_selector("#flt", "e=>e.hidden") and pg.get_attribute("#fbtn", "aria-expanded") == "true")
+        pg.click('#tags .chip >> nth=0'); pg.wait_for_timeout(300)
+        n1 = pg.locator("#grid .card").count()
+        check(f"[{scheme}] фильтры: метка сужает список и на кнопке цифра 1", 0 < n1 < n0 and pg.inner_text("#fbtn").strip().endswith("1"), (n0, n1, pg.inner_text("#fbtn")))
+        pg.click("#freset"); pg.wait_for_timeout(300)
+        check(f"[{scheme}] фильтры: «Сбросить» возвращает всё", pg.locator("#grid .card").count() == n0 and pg.locator("#fbtn b").count() == 0)
+        pg.keyboard.press("Escape"); check(f"[{scheme}] фильтры: Escape закрывает панель", pg.eval_on_selector("#flt", "e=>e.hidden"))
+        pg.click("#fbtn"); pg.mouse.click(195, 790)
+        check(f"[{scheme}] фильтры: клик вне панели закрывает её", pg.eval_on_selector("#flt", "e=>e.hidden"))
+        pg.evaluate("window.scrollTo(0,600)"); pg.wait_for_timeout(200); pg.click("#fbtn")
+        check(f"[{scheme}] фильтры: панель открывается и при прокрутке", pg.is_visible("#flt") and pg.eval_on_selector("#flt", "e=>e.getBoundingClientRect().top") >= 0)
+        pg.click("#fdone"); pg.click('.lb[data-l="kk"]'); pg.click("#fbtn")
+        check(f"[{scheme}] фильтры: на казахском подпись есть", "Сүзгілер" in pg.inner_text("#fbtn") and "Көрсету" in pg.inner_text("#fdone"))
+        check(f"[{scheme}] фильтры: нет ошибок JavaScript", not errs, errs[:2])
+        c.close()
+    # --- метки, подпись и цвет темы из config.js ---
+    CFG = open(os.path.join(ROOT, "config.js"), encoding="utf-8").read()
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    CFG2 = CFG + '\nconst LABELS_CFG = {vegan:{ru:"Веган",kk:"Вегандық",color:"#2e7d32",icon:"V"}, bad:{ru:""}, "Плохой Ключ":{ru:"x"}, fav:{ru:"взлом"}};\n'
+    CFG2 = CFG2.replace('const FOOTER_SIGN = "Made by Рурак Д. · 2026";', 'const FOOTER_SIGN = "Сделано для кафе «Тест»";').replace('const THEME_COLORS = ["#fbf4e6", "#0c1a1f"];', 'const THEME_COLORS = ["#ffffff", "#000000"];')
+    pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="application/javascript", body=CFG2))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_SRC!=='none'")
+    names = pg.evaluate("PRODUCTS.map(p=>p.name)")
+    pg.evaluate("t=>applyPrices(t)", "Товар,Цена,Метки\n\"%s\",600,\"Веган, Хит\"\n" % names[0]); pg.evaluate("applyLang()")
+    check("метки: своя метка «Веган» читается из таблицы", pg.evaluate("PRODUCTS[0].labels") == ["vegan", "hit"], pg.evaluate("PRODUCTS[0].labels"))
+    check("метки: служебные и неправильные ключи из config.js игнорируются", pg.evaluate("Object.keys(LABELS)") == ["halal", "new", "hit", "sale", "spicy", "vegan", "fav", "stock"], pg.evaluate("Object.keys(LABELS)"))
+    check("метки: служебную «Избранное» подменить нельзя", pg.evaluate("LABELS.fav.ru") != "взлом")
+    rib = pg.locator("#grid .card >> nth=0").locator(".rib.r-vegan")
+    check("метки: лента «Веган» с цветом и значком на карточке", rib.count() == 1 and rib.evaluate("e=>getComputedStyle(e,'::before').content") == '"V"' and "rgb(46, 125, 50)" in rib.evaluate("e=>getComputedStyle(e).backgroundColor"), (rib.count(), rib.inner_text(), rib.evaluate("e=>getComputedStyle(e).backgroundColor")))
+    pg.click("#fbtn")
+    check("метки: «Веган» есть среди фильтров", "Веган" in pg.inner_text("#tags"))
+    check("подпись: берётся из config.js", "Сделано для кафе «Тест»" in pg.inner_text("#footer") and "Рурак" not in pg.inner_text("#footer"))
+    check("цвет темы: берётся из config.js", pg.evaluate("[...document.querySelectorAll('meta[name=theme-color]')].map(m=>m.content)") == ["#ffffff", "#000000"])
+    check("метки: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    # --- разбор таблицы без внешней сети: цены, акции, даты, самопроверка ---
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_SRC!=='none'")
+    names = pg.evaluate("PRODUCTS.map(p=>p.name)")
+    def table(rows):
+        return "Товар,Цена,Акционная цена,Акция до,Метки,Изменено,Нет в наличии\n" + "\n".join(",".join('"%s"' % x for x in r) for r in rows) + "\n"
+    rows = [
+        [names[0], "1 300,00 ₸", "", "", "", "30.10.2026", ""],
+        [names[1], "1000", "800", "31.12.2099", "", "", ""],
+        [names[2], "1000", "800", "01.01.2020", "", "", ""],
+        [names[3], "1000", "1200", "", "", "", ""],
+        [names[4], "1000", "800", "до пятницы", "", "", ""],
+        [names[5], "", "", "", "", "", "TRUE"],
+        ["Такого товара нет на сайте", "500", "", "", "", "", ""],
+        ["", "", "", "", "", "", "FALSE"],
+    ]
+    pg.evaluate("t=>applyPrices(t)", table(rows))
+    got = pg.evaluate("PRODUCTS.slice(0,6).map(p=>({price:p.price,old:p.oldPrice||null,out:!!p.out}))")
+    check("разбор: «1 300,00 ₸» = 1300", got[0]["price"] == 1300, got[0])
+    check("разбор: акция до 31.12.2099 действует", got[1]["price"] == 800 and got[1]["old"] == 1000, got[1])
+    check("разбор: просроченная акция не действует", got[2]["price"] == 1000 and got[2]["old"] is None, got[2])
+    check("разбор: акция дороже обычной не действует", got[3]["price"] == 1000 and got[3]["old"] is None, got[3])
+    check("разбор: непонятная дата не включает акцию", got[4]["price"] == 1000 and got[4]["old"] is None, got[4])
+    check("разбор: пустая цена и «Нет в наличии»", got[5]["price"] is None and got[5]["out"], got[5])
+    check("самопроверка: непонятная дата названа", pg.evaluate("BAD_PROMO") == [names[4]])
+    check("самопроверка: бесполезная акция названа", pg.evaluate("DEAD_PROMO") == [names[3]])
+    check("самопроверка: лишняя строка таблицы названа", pg.evaluate("UNKNOWN_ROWS") == ["Такого товара нет на сайте"])
+    check("самопроверка: товары без строки в таблице названы", len(pg.evaluate("NOT_IN_TABLE")) == len(names) - 6 and names[6] in pg.evaluate("NOT_IN_TABLE"))
+    check("разбор: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    # --- лист «Товары»: описания из таблицы и запасной products.csv ---
+    CFG = open(os.path.join(ROOT, "config.js"), encoding="utf-8").read()
+    def desc_csv(rows):
+        return "Товар,Вес,Состав,КБЖУ,Аллергены,Название (каз),Состав (каз),КБЖУ (каз),Аллергены (каз)\n" + "\n".join(",".join('"%s"' % x for x in r) for r in rows) + "\n"
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.route("**/products.csv*", lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=desc_csv([["__N0__", "123 г", "Тестовый состав из файла", "", "Молоко", "", "", "", ""]])))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("DESC_SRC!=='none'")
+    n0, n1 = pg.evaluate("[PRODUCTS[0].name, PRODUCTS[1].name]")
+    pg.unroute("**/products.csv*")
+    pg.route("**/products.csv*", lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=desc_csv([[n0, "123 г", "Тестовый состав из файла", "", "Молоко", "Қазақша атау", "", "", ""], ["Нет такого товара", "1 г", "", "", "", "", "", "", ""]])))
+    pg.reload(); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("DESC_SRC==='file'")
+    got = pg.evaluate("(()=>{const p=PRODUCTS[0],q=PRODUCTS[1];return {w:p.weight,c:p.composition,a:p.allergens,kn:p.kk.name,kc:p.kk.composition,qc:q.composition}})()")
+    check("«Товары»: запасной products.csv подставляет вес, состав, аллергены", got["w"] == "123 г" and got["c"] == "Тестовый состав из файла" and got["a"] == "Молоко", got)
+    check("«Товары»: казахское название из файла", got["kn"] == "Қазақша атау", got)
+    check("«Товары»: пустые ячейки оставляют значения из products.js", got["kc"] and got["qc"] != "Тестовый состав из файла", got)
+    check("«Товары»: строка с неизвестным названием названа", pg.evaluate("DESC_UNKNOWN") == ["Нет такого товара"])
+    pg.click("#grid .card >> nth=0"); pg.wait_for_selector("#dlg[open]")
+    t = pg.inner_text("#dlg")
+    check("«Товары»: в карточке видны состав и блок «Аллергены»", "Тестовый состав из файла" in t and "Аллергены" in t and "Молоко" in t and "123 г" in t, t[:200])
+    pg.evaluate("t=>applyDescriptions(t)", desc_csv([[n0, "", "", "", "", "", "", "", ""]]))
+    check("«Товары»: очищенная ячейка возвращает текст из products.js", pg.evaluate("PRODUCTS[0].composition") != "Тестовый состав из файла" and pg.evaluate("PRODUCTS[0].weight") != "123 г")
+    check("«Товары»: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); held = []
+    pg.route("**/config.js", lambda r: r.fulfill(status=200, content_type="application/javascript", body=re.sub(r'productsGid:\s*"\d*"', 'productsGid: "999"', CFG)))
+    pg.route(re.compile(r"docs\.google\.com/.*gid=999"), lambda r: held.append(r))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=5000)
+    n0 = pg.evaluate("PRODUCTS[0].name")
+    held[0].fulfill(status=200, content_type="text/csv; charset=utf-8", body=desc_csv([[n0, "999 г", "Состав из таблицы", "", "", "", "", "", ""]]))
+    pg.wait_for_function("DESC_SRC==='sheet'", timeout=5000)
+    check("«Товары»: лист из Google обновляет описание после показа каталога", pg.evaluate("PRODUCTS[0].weight") == "999 г" and pg.evaluate("PRODUCTS[0].composition") == "Состав из таблицы")
+    c.close()
+    # --- порядок загрузки: цены из запасного файла сразу, таблица Google позже ---
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); held = []
+    pg.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: held.append(r))   # таблица «зависла»
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=5000)
+    check("загрузка: каталог показан, пока таблица ещё не ответила", pg.evaluate("PRICES_SRC") == "file" and len(held) == 1)
+    n0 = pg.evaluate("PRODUCTS[0].name")
+    held[0].fulfill(status=200, content_type="text/csv; charset=utf-8", body=table([[n0, "777", "", "", "", "", ""]]))
+    pg.wait_for_function("PRICES_SRC==='sheet'", timeout=5000)
+    check("загрузка: ответ таблицы обновляет цены", pg.evaluate("PRODUCTS[0].price") == 777 and "777" in pg.inner_text("#grid"))
+    check("загрузка: плашки «цены устарели» нет", pg.eval_on_selector("#offline", "e=>e.hidden"))
+    c.close()
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
+    pg.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: r.fulfill(status=503, body="no"))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_STALE===true", timeout=5000)
+    check("загрузка: таблица недоступна — плашка и причина", not pg.eval_on_selector("#offline", "e=>e.hidden") and "503" in pg.evaluate("PRICES_WHY"), pg.evaluate("PRICES_WHY"))
+    c.close()
+    # --- все папки заказчиков из tools/clients.json: код совпадает с корнем и страница открывается ---
+    import json
+    root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
+    root_sw = open(os.path.join(ROOT, "sw.js"), encoding="utf-8").read()
+    for cl in json.load(open(os.path.join(ROOT, "tools", "clients.json"), encoding="utf-8")):
+        d = cl["dir"]; want = root_src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">', 1) if cl.get("noindex") else root_src
+        check(f"заказчик {d}: index.html совпадает с корнем (запусти tools/sync_clients.py)", want == open(os.path.join(ROOT, d, "index.html"), encoding="utf-8").read())
+        check(f"заказчик {d}: sw.js совпадает с корнем", root_sw == open(os.path.join(ROOT, d, "sw.js"), encoding="utf-8").read())
+        check(f"заказчик {d}: свои файлы на месте", all(os.path.exists(os.path.join(ROOT, d, f)) for f in ("config.js", "products.js", "manifest.json")))
+        c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+        pg.on("pageerror", lambda e: errs.append(str(e)))
+        pg.goto(BASE + d + "/index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=8000)
+        check(f"заказчик {d}: каталог открывается без ошибок", pg.locator("#grid .card").count() > 0 and not errs, errs[:2])
+        c.close()
     b.close()
 
 print("\nИтог:", "всё в порядке" if not fails else f"упало {len(fails)}: " + "; ".join(fails))
