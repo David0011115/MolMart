@@ -1087,7 +1087,7 @@ applyBrand();
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic"></div><div class="body"><div class="ln"></div><div class="ln s"></div><div class="ln p"></div></div></div>`.repeat(6);
 
-let PRICES_SRC="none";
+let PRICES_SRC="none", PRICES_WHY=""; /* PRICES_WHY: почему не открылась таблица цен (идёт в «Логи проверки»), например «не уложились в 4 с» */
 /* ===== Самопроверка: раз в сутки с устройства, отправляет итог в лист «Логи проверки» (см. скрипт Проверки.gs) =====
    Включается вместе с SUGGEST_URL (тот же адрес). Не работает в демо, офлайн и в автотестах (navigator.webdriver). */
 const CHK_ON = ()=> typeof SUGGEST_URL!=="undefined" && !!SUGGEST_URL;
@@ -1099,7 +1099,7 @@ async function runCheck(force){
     if(!force){ try{ if(localStorage.getItem("chk")===day) return; }catch(e){} }
     const probs=[], vis=PRODUCTS.filter(p=>!p.hidden);
     /* порядок: срочное (таблица, фото) раньше, «нет цены» одной строкой в конце */
-    if(SETTINGS.pricesSheet && PRICES_SRC!=="sheet") probs.push("таблица цен недоступна, показаны запасные цены");
+    if(SETTINGS.pricesSheet && PRICES_SRC!=="sheet") probs.push("таблица цен недоступна, показаны запасные цены"+(PRICES_WHY?" ("+PRICES_WHY.replace(/[|]/g," ").slice(0,60)+")":""));
     const bad=[], list=vis.filter(p=>p.image);
     const test=src=>new Promise(res=>{ const im=new Image(); const to=setTimeout(()=>res(false),8000);
       im.onload=()=>{clearTimeout(to);res(true)}; im.onerror=()=>{clearTimeout(to);res(false)}; im.src=src; });
@@ -1121,11 +1121,18 @@ async function runCheck(force){
 }
 async function loadPrices(){
   try{
-    const get=async(url,ms)=>{ const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),ms);
+    /* get бросает ошибку с понятной причиной: таймаут, код ответа, «не таблица», сеть; причину для таблицы цен запоминаем в PRICES_WHY */
+    const get=async(url,ms)=>{ const ctl=new AbortController(), t0=Date.now(), to=setTimeout(()=>ctl.abort(),ms); const sec=()=>((Date.now()-t0)/1000).toFixed(1)+" с";
       try{ const r=await fetch(url+(url.includes("?")?"&":"?")+"v="+Date.now(),{cache:"no-store",signal:ctl.signal});
-        const t=r.ok?await r.text():""; return /товар/i.test(t.split("\n")[0]||"")?t:""; } finally{ clearTimeout(to); } };
-    let text=""; PRICES_SRC="none";
-    if(SETTINGS.pricesSheet){ try{ text=await get(SETTINGS.pricesSheet,4000); if(text) PRICES_SRC="sheet"; }catch(e){} }
+        if(!r.ok) throw new Error("код ответа "+r.status+", "+sec());
+        const t=await r.text(); if(!/товар/i.test(t.split("\n")[0]||"")) throw new Error("пришло не то, что нужно (не CSV), "+sec());
+        return t;
+      }catch(e){ if(e&&e.name==="AbortError") throw new Error("не уложились в "+(ms/1000)+" с");
+        if(e&&/^(код ответа|пришло не)/.test(e.message||"")) throw e;
+        throw new Error("сеть: запрос не прошёл, "+sec()); }
+      finally{ clearTimeout(to); } };
+    let text=""; PRICES_SRC="none"; PRICES_WHY="";
+    if(SETTINGS.pricesSheet){ try{ text=await get(SETTINGS.pricesSheet,4000); if(text) PRICES_SRC="sheet"; }catch(e){ PRICES_WHY=String(e&&e.message||"неизвестно"); } }
     if(!text){ try{ text=await get(SETTINGS.pricesFile,4000); if(text) PRICES_SRC="file"; }catch(e){} }
     if(text) applyPrices(text);
   }catch(e){}
