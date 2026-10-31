@@ -192,6 +192,53 @@ with sync_playwright() as p:
     check("настройки недоступны: объявление скрыто", pg.eval_on_selector("#annc", "e=>e.hidden"))
     check("настройки недоступны: нет ошибок JavaScript", not errs, errs[:2])
     c.close()
+    # --- разбор таблицы без внешней сети: цены, акции, даты, самопроверка ---
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
+    pg.on("pageerror", lambda e: errs.append(str(e)))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_SRC!=='none'")
+    names = pg.evaluate("PRODUCTS.map(p=>p.name)")
+    def table(rows):
+        return "Товар,Цена,Акционная цена,Акция до,Метки,Изменено,Нет в наличии\n" + "\n".join(",".join('"%s"' % x for x in r) for r in rows) + "\n"
+    rows = [
+        [names[0], "1 300,00 ₸", "", "", "", "30.10.2026", ""],
+        [names[1], "1000", "800", "31.12.2099", "", "", ""],
+        [names[2], "1000", "800", "01.01.2020", "", "", ""],
+        [names[3], "1000", "1200", "", "", "", ""],
+        [names[4], "1000", "800", "до пятницы", "", "", ""],
+        [names[5], "", "", "", "", "", "TRUE"],
+        ["Такого товара нет на сайте", "500", "", "", "", "", ""],
+        ["", "", "", "", "", "", "FALSE"],
+    ]
+    pg.evaluate("t=>applyPrices(t)", table(rows))
+    got = pg.evaluate("PRODUCTS.slice(0,6).map(p=>({price:p.price,old:p.oldPrice||null,out:!!p.out}))")
+    check("разбор: «1 300,00 ₸» = 1300", got[0]["price"] == 1300, got[0])
+    check("разбор: акция до 31.12.2099 действует", got[1]["price"] == 800 and got[1]["old"] == 1000, got[1])
+    check("разбор: просроченная акция не действует", got[2]["price"] == 1000 and got[2]["old"] is None, got[2])
+    check("разбор: акция дороже обычной не действует", got[3]["price"] == 1000 and got[3]["old"] is None, got[3])
+    check("разбор: непонятная дата не включает акцию", got[4]["price"] == 1000 and got[4]["old"] is None, got[4])
+    check("разбор: пустая цена и «Нет в наличии»", got[5]["price"] is None and got[5]["out"], got[5])
+    check("самопроверка: непонятная дата названа", pg.evaluate("BAD_PROMO") == [names[4]])
+    check("самопроверка: бесполезная акция названа", pg.evaluate("DEAD_PROMO") == [names[3]])
+    check("самопроверка: лишняя строка таблицы названа", pg.evaluate("UNKNOWN_ROWS") == ["Такого товара нет на сайте"])
+    check("самопроверка: товары без строки в таблице названы", len(pg.evaluate("NOT_IN_TABLE")) == len(names) - 6 and names[6] in pg.evaluate("NOT_IN_TABLE"))
+    check("разбор: нет ошибок JavaScript", not errs, errs[:2])
+    c.close()
+    # --- порядок загрузки: цены из запасного файла сразу, таблица Google позже ---
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); held = []
+    pg.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: held.append(r))   # таблица «зависла»
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=5000)
+    check("загрузка: каталог показан, пока таблица ещё не ответила", pg.evaluate("PRICES_SRC") == "file" and len(held) == 1)
+    n0 = pg.evaluate("PRODUCTS[0].name")
+    held[0].fulfill(status=200, content_type="text/csv; charset=utf-8", body=table([[n0, "777", "", "", "", "", ""]]))
+    pg.wait_for_function("PRICES_SRC==='sheet'", timeout=5000)
+    check("загрузка: ответ таблицы обновляет цены", pg.evaluate("PRODUCTS[0].price") == 777 and "777" in pg.inner_text("#grid"))
+    check("загрузка: плашки «цены устарели» нет", pg.eval_on_selector("#offline", "e=>e.hidden"))
+    c.close()
+    c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
+    pg.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: r.fulfill(status=503, body="no"))
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_function("PRICES_STALE===true", timeout=5000)
+    check("загрузка: таблица недоступна — плашка и причина", not pg.eval_on_selector("#offline", "e=>e.hidden") and "503" in pg.evaluate("PRICES_WHY"), pg.evaluate("PRICES_WHY"))
+    c.close()
     b.close()
 
 print("\nИтог:", "всё в порядке" if not fails else f"упало {len(fails)}: " + "; ".join(fails))
