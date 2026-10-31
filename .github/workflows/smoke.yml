@@ -2,6 +2,8 @@ name: Проверка сайта
 on:
   push:
   pull_request:
+permissions:
+  contents: read
 jobs:
   smoke:
     runs-on: ubuntu-latest

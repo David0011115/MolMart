@@ -25,6 +25,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 TARGET = os.path.join(ROOT, "prices.csv")
 MIN_KEEP = 0.8          # новых товаров не меньше 80% от прежнего числа
 MIN_KEEP_PRICED = 0.6   # товаров с ценой не меньше 60% от прежнего числа
+MAX_PRICE = 50000       # цена больше этого числа считается ошибкой формата (например, «1 300,00» прочитано как 130000)
 
 
 def fail(msg):
@@ -65,8 +66,9 @@ def read_rows(text):
 
 
 def norm_price(v):
-    """«1 300 ₸» -> 1300. Если значение не похоже на число, оставляем как есть."""
+    """«1 300 ₸» -> 1300, «1 300,00 ₸» -> 1300. Если значение не похоже на число, оставляем как есть (его поймает bad_prices)."""
     s = v.replace(" ", "").replace(" ", "").replace(" ", "").replace("₸", "").strip()
+    s = re.sub(r"[.,]00$", "", s)   # копейки отбрасываем
     if re.fullmatch(r"\d+", s):
         return str(int(s))
     if re.fullmatch(r"\d+[.,]\d+", s):
@@ -112,6 +114,21 @@ def priced(rows):
     return sum(1 for r in rows[1:] if r[i].strip())
 
 
+def bad_prices(rows):
+    """Цены, которые не число (#N/A, «уточняется») или слишком большие. Пустая цена допустима (товар без цены или «Нет в наличии»)."""
+    head = [c.strip().lower() for c in rows[0]]
+    cols = [head.index(k) for k in ("цена", "акционная цена") if k in head]
+    bad = []
+    for r in rows[1:]:
+        for i in cols:
+            v = r[i].strip()
+            if not v:
+                continue
+            if not re.fullmatch(r"\d+", v) or int(v) > MAX_PRICE:
+                bad.append("%s: %r" % (r[1], v))
+    return bad
+
+
 def serialize(rows):
     o = io.StringIO()
     csv.writer(o, lineterminator="\n").writerows(rows)
@@ -150,6 +167,9 @@ def main():
     old_n, new_n = len(old_rows) - 1, len(new_rows) - 1
     old_p, new_p = priced(old_rows), priced(new_rows)
     print("товаров: было %d, стало %d; с ценой: было %d, стало %d" % (old_n, new_n, old_p, new_p))
+    bad = bad_prices(new_rows)
+    if bad:
+        fail("в таблице цены не похожи на цену (%d), файл не обновлён. Исправьте их в таблице: %s" % (len(bad), "; ".join(bad[:8])))
     if os.environ.get("FORCE", "").strip() not in ("1", "true"):
         if old_n >= 10 and new_n < old_n * MIN_KEEP:
             fail("товаров стало слишком мало (%d из %d), файл не обновлён. Если так и задумано, запустите вручную с force" % (new_n, old_n))

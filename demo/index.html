@@ -73,7 +73,7 @@ h1{font:700 clamp(17px,5vw,22px)/1.1 Unbounded,Onest,system-ui,sans-serif;color:
 .note{font-size:12.5px;color:var(--muted);margin-top:16px!important}
 .lang{position:absolute;top:12px;right:12px;display:flex;border:2px solid #0b7a8a;border-radius:999px;overflow:hidden;background:#fff;box-shadow:0 3px 10px rgba(11,122,138,.3)}
 .lb{border:0;background:transparent;color:#0b5f6b;font:700 15px Onest,system-ui,sans-serif;padding:9px 16px;cursor:pointer;min-width:52px}
-.lb[aria-pressed="true"]{background:linear-gradient(90deg,var(--b1),var(--b2));color:#fff}
+.lb[aria-pressed="true"]{background:#0b5f6b;color:#fff}
 .lb:focus-visible{outline:3px solid var(--accent);outline-offset:-3px}
 .abbtn{position:absolute;top:12px;left:12px;display:grid;place-items:center;width:44px;height:44px;padding:0;border:2px solid #0b7a8a;border-radius:50%;background:#fff;color:#0b5f6b;font:700 20px Onest,system-ui,sans-serif;cursor:pointer;box-shadow:0 3px 10px rgba(11,122,138,.3)}
 .abbtn[hidden]{display:none}
@@ -91,7 +91,7 @@ h1{font:700 clamp(17px,5vw,22px)/1.1 Unbounded,Onest,system-ui,sans-serif;color:
 .tags:empty{display:none}
 .badges{position:absolute;left:8px;top:8px;display:flex;flex-direction:column;gap:5px;align-items:flex-start;z-index:2}
 .badge{font:700 11.5px/1 Onest,system-ui,sans-serif;color:#fff;padding:5px 9px;border-radius:999px;box-shadow:0 1px 3px rgba(0,0,0,.2)}
-.seal{position:absolute;left:8px;top:8px;z-index:2;width:50px;height:50px;border-radius:50%;background:#1f8a4c;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff}
+.seal{position:absolute;left:8px;top:8px;z-index:2;width:50px;height:50px;border-radius:50%;background:#17773f;border:2px solid #fff;box-shadow:0 2px 6px rgba(0,0,0,.22);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;color:#fff}
 .seal i{font:700 8px/1 Onest,system-ui,sans-serif;font-style:normal;letter-spacing:.04em;text-transform:uppercase}
 .ribs{position:absolute;right:0;top:10px;z-index:2;display:flex;flex-direction:column;gap:5px;align-items:flex-end}
 .sheet .ribs{top:10px}
@@ -101,8 +101,8 @@ h1{font:700 clamp(17px,5vw,22px)/1.1 Unbounded,Onest,system-ui,sans-serif;color:
 dialog.zm::after{content:"×";position:fixed;top:10px;right:18px;color:#fff;font-size:38px;line-height:1;pointer-events:none}
 .rib{font:700 11.5px/1 Onest,system-ui,sans-serif;color:#fff;padding:6px 10px 6px 18px;clip-path:polygon(0 0,100% 0,100% 100%,0 100%,9px 50%)}
 .rib::before{margin-right:4px}
-.r-new{background:#2b7be4}.r-new::before{content:"✦"}
-.r-hit{background:#e0701a}.r-hit::before{content:"★"}
+.r-new{background:#1f63c4}.r-new::before{content:"✦"}
+.r-hit{background:#b5520c}.r-hit::before{content:"★"}
 .r-sale{background:#d93a3a}.r-sale::before{content:"%"}
 .r-spicy{background:#9c1c2c}.r-spicy::before{content:"\1F336"}
 .rib i{font-style:normal}
@@ -440,11 +440,11 @@ const STR = {
   ru:{subtitle:"Товары и цены. Оплата на кассе.",updated:"Цены обновлены",search:"Найти товар",all:"Все товары",cat:"Раздел",
       empty:"Ничего не найдено. Попробуйте другое название.",comp:"Состав",alg:"Аллергены",tbl:"Столик",tFrom:"Подаётся с",tUntil:"Подаётся до",tEnd:"Сейчас не подаётся",nutr:"Пищевая ценность",shelf:"Срок годности",
       note:"",noprice:"Цена уточняется",out:"Нет в наличии",
-      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Контакт указывать не обязательно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",hwLink:"Как это работает",hwTitle:"Как это работает",hw1:"Отсканируйте QR-код на холодильнике камерой телефона.",hw2:"Выберите товар: цены и акции показаны сразу, приложение ставить не нужно.",hw3:"Подойдите к кассе. Товар можно добавить в «Кассиру», чтобы показать список на кассе.",hwNote:"Цены обновляются автоматически, всегда видна свежая цена.",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",budT:"Бюджет",budAny:"Любой",budUp:"до {n}",budCnt:"Найдено: {n}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashIn:"В списке кассира",cashClr:"Очистить список",cashRm:"Убрать",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
+      close:"Закрыть",footer:"Цены актуальны на момент сканирования.",dlg:"Карточка товара",sort:"Сортировка по стоимости",sd:"По умолчанию",sa:"Сначала дешёвые",sdsc:"Сначала дорогие",sn:"Сначала новинки",promo:"Акции и новинки",pupd:"Цена от",shop:"Магазин MolMart",addr:"Адрес",hrs:"Часы работы",tel:"Телефон",map:"Открыть на карте",sgTitle:"Нет нужного товара?",sgText:"Подскажите, что добавить в холодильник, и мы передадим владельцу магазина.",sgBtn:"Предложить товар",sgName:"Что добавить?",sgNamePh:"Например: онигири с угрём",sgContact:"Контакт (необязательно)",sgContactPh:"Телефон или Telegram для ответа",sgSend:"Отправить",sgSending:"Отправляем…",sgThanks:"Спасибо! Мы получили ваше предложение.",sgErr:"Не получилось отправить. Попробуйте позже.",sgShort:"Напишите хотя бы 3 символа.",sgWait:"Вы уже отправляли предложение недавно. Попробуйте позже.",sgNote:"Предложение увидит владелец магазина. Телефон и другие личные данные писать не нужно.",sgEmptyBtn:"Предложить товар",sgWhere:"Где видели или кто поставщик (необязательно)",sgWherePh:"Например: другой магазин, бренд Bravo",sgPhoto:"Фото (необязательно, до 3)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фото видит только владелец магазина, на сайте оно не публикуется. Людей на фото не снимайте.",sgPhotoErr:"Не удалось обработать фото. Попробуйте другое.",sgRemove:"Убрать фото",abBtn:"О сайте",hwLink:"Как это работает",hwTitle:"Как это работает",hw1:"Отсканируйте QR-код на холодильнике камерой телефона.",hw2:"Выберите товар: цены и акции показаны сразу, приложение ставить не нужно.",hw3:"Подойдите к кассе. Товар можно добавить в «Кассиру», чтобы показать список на кассе.",hwNote:"Цены обновляются автоматически, всегда видна свежая цена.",abTitle:"О сайте",abText:"Каталог по QR-коду: товары, цены и акции на телефоне, без установки приложений. Цены владелец меняет сам в таблице.",abText2:"Такой же каталог можно сделать для магазина или небольшого кафе.",abGo:"Хочу такой же",thDark:"Тёмная тема",thLight:"Светлая тема",fav:"В избранное",faved:"В избранном",cmpBtn:"Сравнить",cmpTitle:"Сравнение товаров",cmpA:"Товар 1",cmpB:"Товар 2",cmpPrice:"Цена",cmpBrand:"Бренд",cmpW:"Вес",cmpLbl:"Метки",offl:"Нет сети. Показаны сохранённые цены от {d}",budT:"Бюджет",budAny:"Любой",budUp:"до {n}",budCnt:"Найдено: {n}",cashBtn:"Показать кассиру",cashOne:"Кассиру",cashIn:"В списке кассира",cashClr:"Очистить список",cashRm:"Убрать",cashHint:"Покажите это на кассе",cashTot:"Итого",cashNote:"Ориентировочно: итоговую сумму покажет касса.",shr:"Поделиться",shrDone:"Ссылка скопирована",vq:"Нравится этот товар?",vup:"Нравится",vdn:"Не нравится",vthx:"Спасибо за оценку!",pkBtn:"Что взять?",pkTitle:"Не знаете, что выбрать?",pkBud:"Бюджет",pkAny:"Любой",pkUp:"до {n}",pkAgain:"Другой вариант",pkOpen:"Открыть карточку",pkNone:"В этом бюджете сейчас ничего нет в наличии."},
   kk:{subtitle:"Тауарлар мен бағалар. Төлем кассада.",updated:"Бағалар жаңартылды",search:"Тауарды іздеу",all:"Барлық тауарлар",cat:"Бөлім",
       empty:"Ештеңе табылмады. Басқа атауды қолданып көріңіз.",comp:"Құрамы",alg:"Аллергендер",tbl:"Үстел",tFrom:"бастап беріледі",tUntil:"дейін беріледі",tEnd:"Қазір берілмейді",nutr:"Қоректік құндылығы",shelf:"Жарамдылық мерзімі",
       note:"",noprice:"Баға нақтылануда",out:"Қолда жоқ",
-      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Байланыс көрсету міндетті емес.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",hwLink:"Бұл қалай жұмыс істейді",hwTitle:"Бұл қалай жұмыс істейді",hw1:"Тоңазытқыштағы QR-кодты телефон камерасымен сканерлеңіз.",hw2:"Тауарды таңдаңыз: бағалар мен акциялар бірден көрінеді, қолданба орнатудың қажеті жоқ.",hw3:"Кассаға барыңыз. Тауарды «Кассирге» тізіміне қосып, кассада көрсетуге болады.",hwNote:"Бағалар автоматты түрде жаңарады, әрқашан жаңа баға көрінеді.",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",budT:"Бюджет",budAny:"Кез келген",budUp:"{n} дейін",budCnt:"Табылды: {n}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashIn:"Кассир тізімінде",cashClr:"Тізімді тазалау",cashRm:"Алып тастау",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
+      close:"Жабу",footer:"Бағалар сканерлеу сәтіндегі жағдай бойынша берілген.",dlg:"Тауар карточкасы",sort:"Бағасы бойынша сұрыптау",sd:"Әдепкі",sa:"Алдымен арзан",sdsc:"Алдымен қымбат",sn:"Алдымен жаңалар",promo:"Акциялар мен жаңалықтар",pupd:"Баға күні",shop:"MolMart дүкені",addr:"Мекенжай",hrs:"Жұмыс уақыты",tel:"Телефон",map:"Картадан ашу",sgTitle:"Керек тауар жоқ па?",sgText:"Тоңазытқышқа не қосу керегін айтыңыз, біз дүкен иесіне жеткіземіз.",sgBtn:"Тауар ұсыну",sgName:"Не қосу керек?",sgNamePh:"Мысалы: жыланбалықты онигири",sgContact:"Байланыс (міндетті емес)",sgContactPh:"Телефон немесе Telegram",sgSend:"Жіберу",sgSending:"Жіберіп жатырмыз…",sgThanks:"Рақмет! Ұсынысыңызды алдық.",sgErr:"Жіберу мүмкін болмады. Кейінірек қайталап көріңіз.",sgShort:"Кемінде 3 таңба жазыңыз.",sgWait:"Жақында ұсыныс жібердіңіз. Кейінірек қайталаңыз.",sgNote:"Ұсынысты дүкен иесі көреді. Телефон мен жеке деректерді жазудың қажеті жоқ.",sgEmptyBtn:"Тауар ұсыну",sgWhere:"Қайда көрдіңіз немесе жеткізуші кім (міндетті емес)",sgWherePh:"Мысалы: басқа дүкен, Bravo бренді",sgPhoto:"Фото (міндетті емес, 3-ке дейін)",sgAddPhoto:"+ Фото",sgPhotoNote:"Фотоны тек дүкен иесі көреді, сайтта жарияланбайды. Адамдарды түсірмеңіз.",sgPhotoErr:"Фотоны өңдеу мүмкін болмады. Басқасын қолданып көріңіз.",sgRemove:"Фотоны алып тастау",abBtn:"Сайт туралы",hwLink:"Бұл қалай жұмыс істейді",hwTitle:"Бұл қалай жұмыс істейді",hw1:"Тоңазытқыштағы QR-кодты телефон камерасымен сканерлеңіз.",hw2:"Тауарды таңдаңыз: бағалар мен акциялар бірден көрінеді, қолданба орнатудың қажеті жоқ.",hw3:"Кассаға барыңыз. Тауарды «Кассирге» тізіміне қосып, кассада көрсетуге болады.",hwNote:"Бағалар автоматты түрде жаңарады, әрқашан жаңа баға көрінеді.",abTitle:"Сайт туралы",abText:"QR-код арқылы тауарлар, бағалар мен акциялар телефонда, қолданбасыз көрінеді. Бағаны дүкен иесі кестеде өзі өзгертеді.",abText2:"Дәл осындай каталогты дүкенге немесе шағын кафеге жасауға болады.",abGo:"Дәл осындай қалаймын",thDark:"Қараңғы тема",thLight:"Жарық тема",fav:"Таңдаулыға",faved:"Таңдаулыда",cmpBtn:"Салыстыру",cmpTitle:"Тауарларды салыстыру",cmpA:"1-тауар",cmpB:"2-тауар",cmpPrice:"Баға",cmpBrand:"Бренд",cmpW:"Салмағы",cmpLbl:"Белгілер",offl:"Желі жоқ. Сақталған бағалар көрсетілген, күні: {d}",budT:"Бюджет",budAny:"Кез келген",budUp:"{n} дейін",budCnt:"Табылды: {n}",cashBtn:"Кассирге көрсету",cashOne:"Кассирге",cashIn:"Кассир тізімінде",cashClr:"Тізімді тазалау",cashRm:"Алып тастау",cashHint:"Мұны кассада көрсетіңіз",cashTot:"Барлығы",cashNote:"Шамамен: соңғы соманы касса көрсетеді.",shr:"Бөлісу",shrDone:"Сілтеме көшірілді",vq:"Бұл тауар ұнай ма?",vup:"Ұнайды",vdn:"Ұнамайды",vthx:"Бағаңыз үшін рахмет!",pkBtn:"Не алсам екен?",pkTitle:"Нені таңдарыңызды білмейсіз бе?",pkBud:"Бюджет",pkAny:"Кез келген",pkUp:"{n} дейін",pkAgain:"Басқа нұсқа",pkOpen:"Карточканы ашу",pkNone:"Бұл бюджетке қазір қолда ештеңе жоқ."}
 };
 
 /* ===== КОНЕЦ НАСТРОЕК ===== */
@@ -489,7 +489,8 @@ function parseCSV(t,semi=true){
   if(f||row.length){row.push(f);rows.push(row);} return rows;
 }
 const LABEL_BY_RU = Object.fromEntries(Object.entries(LABELS).map(([k,v])=>[v.ru.toLowerCase(),k]));
-const num = v => { const d=String(v||"").replace(/[^\d]/g,""); return d ? +d : null; };
+/* «1 300 ₸», «1300», «1 300,00 ₸» -> 1300 (копейки отбрасываем, иначе 1 300,00 стало бы 130000) */
+const num = v => { const s=String(v||"").replace(/[\s\u00a0]/g,"").replace(/[.,]\d{1,2}(?=[^\d.,]*$)/,""); const d=s.replace(/[^\d]/g,""); return d ? +d : null; };
 /* Меню по времени: колонки «Показывать с» и «Показывать до» (часы:минуты, по Алматы). Вне окна товар бледнеет и подписан «с 17:00». */
 function tmin(v){ const m=String(v||"").trim().match(/^(\d{1,2})(?::(\d{2}))?/); return m && +m[1]<24 ? +m[1]*60+(+m[2]||0) : null; }
 function nowMin(){ const [h,m]=new Intl.DateTimeFormat("en-GB",{timeZone:"Asia/Almaty",hour:"2-digit",minute:"2-digit",hourCycle:"h23"}).format(new Date()).split(":"); return +h*60+ +m; }
@@ -512,13 +513,20 @@ function applyPrices(text){
   if(iN<0) return; let last=null;
   /* «сегодня» по Алматы в виде гггг-мм-дд; «Акция до» (дд.мм.гггг) включительно */
   const today=new Intl.DateTimeFormat("en-CA",{timeZone:"Asia/Almaty"}).format(new Date());
-  const untilISO=s=>{const m=String(s||"").trim().match(/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/); return m?`${m[3]}-${m[2].padStart(2,"0")}-${m[1].padStart(2,"0")}`:"";};
+  /* «Акция до»: 31.10.2026, 31.10.26, 31/10/2026, 2026-10-31. Пусто = без срока, "" ; непонятная дата = null */
+  const pad2=n=>String(n).padStart(2,"0");
+  const untilISO=s=>{ s=String(s||"").trim(); if(!s) return ""; let y,mo,d,m=s.match(/^(\d{1,2})[.\/-](\d{1,2})[.\/-](\d{4}|\d{2})$/);
+    if(m){ d=+m[1]; mo=+m[2]; y=m[3].length===2?2000+ +m[3]:+m[3]; }
+    else { m=s.match(/^(\d{4})-(\d{1,2})-(\d{1,2})$/); if(!m) return null; y=+m[1]; mo=+m[2]; d=+m[3]; }
+    if(mo<1||mo>12||d<1||d>31) return null; return y+"-"+pad2(mo)+"-"+pad2(d); };
+  BAD_PROMO=[];
   for(const r of rows.slice(1)){
     const p=PRODUCTS.find(x=>x.name===(r[iN]||"").trim()); if(!p) continue;
     if(iP>=0) p.price=num(r[iP]);
     if(newFmt){
-      const ap=num(r[iA]), u=iU>=0?untilISO(r[iU]):"";
-      const on = ap>0 && p.price!=null && ap<p.price && (!u || today<=u);
+      const ap=num(r[iA]), u=iU>=0?untilISO(r[iU]):"", badU=u===null;
+      if(badU && ap>0) BAD_PROMO.push(p.name);
+      const on = ap>0 && p.price!=null && ap<p.price && !badU && (!u || today<=u);
       p.oldPrice = on ? p.price : null;
       if(on) p.price = ap;
     } else if(iO>=0) p.oldPrice=num(r[iO]);
@@ -867,8 +875,8 @@ function sgThumbs(){
 }
 function openSuggest(prefill, keep){
   if(keep && !$("sgname")) return;   /* экран «Спасибо» не перерисовываем при смене языка */
-  let where="", contact="";
-  if(keep && $("sgname")){ prefill=$("sgname").value; where=$("sgwhere").value; contact=$("sgcontact").value; }
+  let where="";
+  if(keep && $("sgname")){ prefill=$("sgname").value; where=$("sgwhere").value; }
   else { sgOpened=Date.now(); sgImgs=[]; }
   $("sg").setAttribute("aria-label", T("sgBtn"));
   $("sg").innerHTML = `
@@ -876,10 +884,9 @@ function openSuggest(prefill, keep){
     <form class="sgf" id="sgform" novalidate>
       <h2>${esc(T("sgBtn"))}</h2>
       <p class="sgn">${esc(T("sgNote"))}</p>
-      <label>${esc(T("sgName"))}<input id="sgname" maxlength="80" autocomplete="off" placeholder="${esc(T("sgNamePh"))}" value="${esc(prefill||"")}"></label>
-      <label>${esc(T("sgWhere"))}<input id="sgwhere" maxlength="120" autocomplete="off" placeholder="${esc(T("sgWherePh"))}" value="${esc(where)}"></label>
+      <label>${esc(T("sgName"))}<input id="sgname" class="ym-disable-keys" maxlength="80" autocomplete="off" placeholder="${esc(T("sgNamePh"))}" value="${esc(prefill||"")}"></label>
+      <label>${esc(T("sgWhere"))}<input id="sgwhere" class="ym-disable-keys" maxlength="120" autocomplete="off" placeholder="${esc(T("sgWherePh"))}" value="${esc(where)}"></label>
       <div class="sgph"><span>${esc(T("sgPhoto"))}</span><div class="sgthumbs" id="sgthumbs"></div><input id="sgfile" type="file" accept="image/*" multiple hidden><p class="sgph-n">${esc(T("sgPhotoNote"))}</p></div>
-      <label>${esc(T("sgContact"))}<input id="sgcontact" maxlength="60" autocomplete="off" placeholder="${esc(T("sgContactPh"))}" value="${esc(contact)}"></label>
       <div class="sgh" aria-hidden="true"><label>Website<input id="sgweb" tabindex="-1" autocomplete="off"></label></div>
       <p class="sgmsg" id="sgmsg" role="status" aria-live="polite"></p>
       <button class="sgbtn" id="sgsend" type="submit">${esc(T("sgSend"))}</button>
@@ -890,7 +897,7 @@ function openSuggest(prefill, keep){
 }
 async function sgSubmit(e){
   e.preventDefault();
-  const name=$("sgname").value.trim(), where=$("sgwhere").value.trim(), contact=$("sgcontact").value.trim(), msg=$("sgmsg"), btn=$("sgsend");
+  const name=$("sgname").value.trim(), where=$("sgwhere").value.trim(), msg=$("sgmsg"), btn=$("sgsend");
   const say=(k,err)=>{ msg.textContent=T(k); msg.className="sgmsg"+(err?" err":""); };
   if(name.length<3){ say("sgShort",1); $("sgname").focus(); return; }
   if(!sgAllowed()){ say("sgWait",1); return; }
@@ -900,7 +907,7 @@ async function sgSubmit(e){
     const ctl=new AbortController(), to=setTimeout(()=>ctl.abort(),40000);
     try{
       await fetch(SUGGEST_URL,{method:"POST",mode:"no-cors",signal:ctl.signal,headers:{"Content-Type":"text/plain;charset=utf-8"},
-        body:JSON.stringify({name,where,contact,lang,images:sgImgs.map(d=>d.replace(/^data:image\/jpeg;base64,/,"")),ms:Date.now()-sgOpened})});
+        body:JSON.stringify({name,where,lang,images:sgImgs.map(d=>d.replace(/^data:image\/jpeg;base64,/,"")),ms:Date.now()-sgOpened})});
     }catch(err){ ok=false; } finally{ clearTimeout(to); }
   }
   if(!ok){ say("sgErr",1); btn.disabled=false; return; }
@@ -1088,6 +1095,7 @@ applyBrand();
 if("serviceWorker" in navigator && location.protocol==="https:") navigator.serviceWorker.register("sw.js").catch(()=>{});
 $("grid").innerHTML = `<div class="card sk" aria-hidden="true"><div class="pic"></div><div class="body"><div class="ln"></div><div class="ln s"></div><div class="ln p"></div></div></div>`.repeat(6);
 
+let BAD_PROMO=[]; /* товары, у которых в «Акция до» непонятная дата: акция у них не включается */
 let PRICES_SRC="none", PRICES_WHY=""; /* PRICES_WHY: почему не открылась таблица цен (идёт в «Логи проверки»), например «не уложились в 4 с» */
 /* ===== Самопроверка: раз в сутки с устройства, отправляет итог в лист «Логи проверки» (см. скрипт Проверки.gs) =====
    Включается вместе с SUGGEST_URL (тот же адрес). Не работает в демо, офлайн и в автотестах (navigator.webdriver). */
@@ -1112,6 +1120,7 @@ async function runCheck(force){
     const noKk=vis.filter(p=>!(p.kk&&p.kk.name));
     if(noKk.length>3) probs.push("нет казахского названия у "+noKk.length+" из "+vis.length+" товаров");
     else noKk.forEach(p=>probs.push("нет казахского названия: "+p.name));
+    if(BAD_PROMO.length) probs.push("непонятная дата в «Акция до», акция не включена: "+BAD_PROMO.slice(0,5).join(", ")+(BAD_PROMO.length>5?" и ещё "+(BAD_PROMO.length-5):""));
     const noPrice=vis.filter(p=>!p.out && !(p.price>0));
     if(noPrice.length) probs.push("нет цены у "+noPrice.length+" из "+vis.length+" товаров (см. лист «Цены»)");
     const q=new URLSearchParams({c:"1",src:PRICES_SRC,n:String(vis.length),p:probs.slice(0,12).join("|").slice(0,700),more:String(Math.max(0,probs.length-12)),t:String(Date.now())});

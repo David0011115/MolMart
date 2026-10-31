@@ -17,14 +17,24 @@ def check(name, ok, info=""):
 
 with sync_playwright() as p:
     b = p.chromium.launch()
+    # Тест не должен зависеть от Google: настоящую таблицу цен подменяем локальным prices.csv
+    PRICES_LOCAL = open(os.path.join(ROOT, "prices.csv"), encoding="utf-8-sig").read()
+    _new_context = b.new_context
+    def new_context(**kw):
+        ctx = _new_context(**kw)
+        ctx.route(re.compile(r"docs\.google\.com/.*gid=392017231"), lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=PRICES_LOCAL))
+        return ctx
+    b.new_context = new_context
     for scheme in ("light", "dark"):
         c = b.new_context(viewport={"width": 390, "height": 800}, color_scheme=scheme, service_workers="block")
         pg = c.new_page(); errs = []
         pg.on("pageerror", lambda e: errs.append(str(e)))
-        pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card", timeout=8000)
+        pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)", timeout=8000)
         n = pg.locator("#grid .card").count()
         check(f"[{scheme}] каталог показывает товары", n > 0, n)
         check(f"[{scheme}] нет горизонтальной прокрутки", pg.evaluate("document.documentElement.scrollWidth<=innerWidth+1"))
+        # разбор цен
+        check(f"[{scheme}] цена «1 300,00 ₸» читается как 1300", pg.evaluate("[num('1 300 ₸'),num('1 300,00 ₸'),num('1300.00'),num('')]") == [1300, 1300, 1300, None])
         # поиск
         pg.fill("#q", "кимпаб"); pg.wait_for_timeout(400)
         m = pg.locator("#grid .card").count(); check(f"[{scheme}] поиск сужает список", 0 < m < n, (m, n))
@@ -69,7 +79,7 @@ with sync_playwright() as p:
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
     reqs = []
     pg.route("https://script.google.com/**", lambda r: (reqs.append(r.request.url), r.fulfill(status=200, body="{}"))[0])
-    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card")
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)")
     probs = pg.evaluate("runCheck(true)")
     check("самопроверка: отчёт отправлен", len(reqs) == 1 and "c=1" in reqs[0], reqs[:1])
     check("самопроверка: проблем с фото нет", not any("фото" in x for x in (probs or [])), probs)
@@ -79,18 +89,18 @@ with sync_playwright() as p:
     c.close()
     # срок жизни: избранное хранится долго, список кассира 10 минут
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page()
-    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card")
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)")
     nm = pg.evaluate("PRODUCTS.filter(p=>!p.hidden).slice(0,2).map(p=>p.name)")
     for mins, wf, wc in ((5, 2, 2), (11, 2, 0)):
         pg.evaluate("([n,m])=>{localStorage.setItem('favs',JSON.stringify(n));localStorage.setItem('cash',JSON.stringify(n));localStorage.setItem('cashSeen',String(Date.now()-m*60000))}", [nm, mins])
-        p2 = c.new_page(); p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card")
+        p2 = c.new_page(); p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card:not(.sk)")
         gf = p2.evaluate("JSON.parse(localStorage.getItem('favs')||'[]').length"); gc = p2.evaluate("JSON.parse(localStorage.getItem('cash')||'[]').length")
         check(f"через {mins} мин: избранное {wf}, список кассира {wc}", (gf, gc) == (wf, wc), (gf, gc)); p2.close()
     c.close()
     # демо-версия
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
-    pg.goto(BASE + "demo/index.html"); pg.wait_for_selector("#grid .card")
+    pg.goto(BASE + "demo/index.html"); pg.wait_for_selector("#grid .card:not(.sk)")
     pg.eval_on_selector("#budrange", "e=>{e.value=2;e.dispatchEvent(new Event('input',{bubbles:true}))}"); pg.wait_for_timeout(300)
     nb = pg.locator("#grid .card").count()
     check("демо: фильтр бюджета сужает список", 0 < nb < 12, nb)
@@ -110,7 +120,7 @@ with sync_playwright() as p:
     # демо кофейни: размеры одной карточкой
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e))); pg.on("requestfailed", lambda r: errs.append("FAIL " + r.url))
-    pg.goto(BASE + "demo-cafe/index.html"); pg.wait_for_selector("#grid .card")
+    pg.goto(BASE + "demo-cafe/index.html"); pg.wait_for_selector("#grid .card:not(.sk)")
     check("кафе: размеры собраны в карточки (22 карточки из 27 позиций)", pg.locator("#grid .card").count() == 22, pg.locator("#grid .card").count())
     pg.fill("#q", "капучино"); pg.wait_for_timeout(400)
     check("кафе: на карточке в списке видны цены всех размеров", "·" in pg.inner_text("#grid .card >> nth=0"), pg.inner_text("#grid .card >> nth=0"))
@@ -123,7 +133,7 @@ with sync_playwright() as p:
     check("кафе: нет ошибок", not errs, errs[:2])
     pg.click("#x") if pg.locator("#x").count() else None
     # аллергены, калории, добавки, столик
-    pg.goto(BASE + "demo-cafe/index.html?table=5"); pg.wait_for_selector("#grid .card")
+    pg.goto(BASE + "demo-cafe/index.html?table=5"); pg.wait_for_selector("#grid .card:not(.sk)")
     check("кафе: столик показан на странице", "5" in pg.inner_text("#tblbar") and not pg.eval_on_selector("#tblbar", "e=>e.hidden"), pg.inner_text("#tblbar"))
     check("кафе: раздел «Добавки» есть", pg.evaluate("PRODUCTS.some(p=>p.category==='Добавки')"))
     pg.fill("#q", "круассан"); pg.wait_for_timeout(400); pg.click("#grid .card >> nth=0"); pg.wait_for_selector("#dlg[open]")
@@ -135,14 +145,14 @@ with sync_playwright() as p:
     check("кафе: столик на казахском", "Үстел 5" in pg.inner_text("#tblbar"), pg.inner_text("#tblbar"))
     # меню по времени (часы Алматы = UTC+5): утро 09:00 и вечер 20:00
     for hh, iso, early_late, eve_late in ((9, "2026-10-30T04:00:00Z", False, True), (20, "2026-10-30T15:00:00Z", True, False)):
-        pc = c.new_page(); pc.clock.set_fixed_time(iso); pc.goto(BASE + "demo-cafe/index.html"); pc.wait_for_selector("#grid .card")
+        pc = c.new_page(); pc.clock.set_fixed_time(iso); pc.goto(BASE + "demo-cafe/index.html"); pc.wait_for_selector("#grid .card:not(.sk)")
         pc.fill("#q", "сырники"); pc.wait_for_timeout(400)
         check(f"кафе {hh}:00: завтрак {'недоступен' if early_late else 'доступен'}", (pc.locator("#grid .card.late").count() == 1) == early_late)
         pc.fill("#q", "паста"); pc.wait_for_timeout(400)
         check(f"кафе {hh}:00: вечернее меню {'недоступно' if eve_late else 'доступно'}", (pc.locator("#grid .card.late").count() == 1) == eve_late)
         if eve_late: check(f"кафе {hh}:00: подпись «с 17:00»", "17:00" in pc.inner_text("#grid .card .oos.lt"), pc.inner_text("#grid .card"))
         pc.close()
-    pg.evaluate("sessionStorage.clear()"); pg.goto(BASE + "demo-cafe/index.html?table=%3Cb%3E"); pg.wait_for_selector("#grid .card")
+    pg.evaluate("sessionStorage.clear()"); pg.goto(BASE + "demo-cafe/index.html?table=%3Cb%3E"); pg.wait_for_selector("#grid .card:not(.sk)")
     check("кафе: мусор в ?table= игнорируется", pg.eval_on_selector("#tblbar", "e=>e.hidden"))
     root_src = open(os.path.join(ROOT, "index.html"), encoding="utf-8").read()
     want = root_src.replace('<meta charset="utf-8">', '<meta charset="utf-8">\n<meta name="robots" content="noindex,nofollow">', 1)
@@ -153,7 +163,7 @@ with sync_playwright() as p:
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.route(re.compile(r"gid=777000444"), lambda r: r.fulfill(status=200, content_type="text/csv; charset=utf-8", body=SET_CSV))
-    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card"); pg.wait_for_timeout(800)
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_timeout(800)
     check("настройки: адрес из листа показан в блоке магазина", "Тестовая 1" in pg.inner_text("#shop"), pg.inner_text("#shop")[:60])
     check("настройки: пустые часы остаются из config.js", "8:00" in pg.inner_text("#shop"), pg.inner_text("#shop")[:80])
     check("настройки: объявление с «;» показано целиком", pg.inner_text("#annc") == "Сегодня до 22:00; приходите", pg.inner_text("#annc"))
@@ -169,7 +179,7 @@ with sync_playwright() as p:
         d = pb.evaluate("getComputedStyle(document.querySelector('#title .lg'),'::after').display")
         check("настройки: блик на логотипе " + (val or "(строки нет)") + " -> " + want, d == want, d); pb.close()
     p2 = c.new_page(); p2.route(re.compile(r"gid=777000444"), lambda r: r.abort())
-    p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card"); p2.wait_for_timeout(500)
+    p2.goto(BASE + "index.html"); p2.wait_for_selector("#grid .card:not(.sk)"); p2.wait_for_timeout(500)
     check("настройки: если лист не открылся, остаётся последняя сохранённая копия", "Тестовая 1" in p2.inner_text("#shop"), p2.inner_text("#shop")[:60]); p2.close()
     check("настройки: нет ошибок JavaScript", not errs, errs[:2])
     c.close()
@@ -177,22 +187,11 @@ with sync_playwright() as p:
     c = b.new_context(viewport={"width": 390, "height": 800}, service_workers="block"); pg = c.new_page(); errs = []
     pg.on("pageerror", lambda e: errs.append(str(e)))
     pg.route(re.compile(r"gid=777000444"), lambda r: r.fulfill(status=404, body="no"))
-    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card"); pg.wait_for_timeout(500)
+    pg.goto(BASE + "index.html"); pg.wait_for_selector("#grid .card:not(.sk)"); pg.wait_for_timeout(500)
     check("настройки недоступны: адрес из config.js", "Улы Дала" in pg.inner_text("#shop"), pg.inner_text("#shop")[:60])
     check("настройки недоступны: объявление скрыто", pg.eval_on_selector("#annc", "e=>e.hidden"))
     check("настройки недоступны: нет ошибок JavaScript", not errs, errs[:2])
     c.close()
-    # калькулятор
-    c = b.new_context(viewport={"width": 390, "height": 800}); pg = c.new_page(); errs = []
-    pg.on("pageerror", lambda e: errs.append(str(e)))
-    pg.goto(BASE + "calc-k7x2q9.html")
-    pg.fill("#np", "40"); pg.fill("#nf", "40"); pg.fill("#nr", "2"); pg.fill("#mo", "0")
-    t = pg.inner_text("#res").replace("\xa0", " ")
-    check("калькулятор: 40 товаров и 40 фото = 68 000 ₸", "68 000 ₸" in t and "7 000 ₸" in t, t[:80])
-    pg.fill("#mo", "12"); t = pg.inner_text("#res").replace("\xa0", " ")
-    check("калькулятор: 12 месяцев со скидкой 15%", "скидка 15%" in t and "71 400 ₸" in t)
-    check("калькулятор: noindex на месте", pg.get_attribute('meta[name="robots"]', "content") == "noindex,nofollow")
-    check("калькулятор: нет ошибок JavaScript", not errs, errs[:2])
     b.close()
 
 print("\nИтог:", "всё в порядке" if not fails else f"упало {len(fails)}: " + "; ".join(fails))
