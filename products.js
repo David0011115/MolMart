@@ -198,4 +198,10 @@ const PRODUCTS = [
   {name:"Тушёная картошка с мясом", brand:"Ням Ням", category:"Комплексные обеды", weight:"", price:null, labels:[], image:"img/68.webp",
    composition:"Картофель, тушёное мясо, укроп, специи.", shelfLife:"", nutrition:"",
    kk:{name:"Етпен бұқтырылған картоп", composition:"Картоп, бұқтырылған ет, аскөк, дәмдеуіштер."}},
+  {name:"Самса с сыром", brand:"", category:"Выпечка", weight:"", price:null, labels:[], image:"img/69.webp",
+   composition:"Слоёное тесто, сыр, мак.", shelfLife:"", nutrition:"",
+   kk:{name:"Ірімшікті самса", composition:"Қабатты қамыр, ірімшік, көкнәр."}},
+  {name:"Самса с курицей", brand:"", category:"Выпечка", weight:"", price:null, labels:[], image:"img/70.webp",
+   composition:"Слоёное тесто, курица, лук, специи.", shelfLife:"", nutrition:"",
+   kk:{name:"Тауық етті самса", composition:"Қабатты қамыр, тауық еті, пияз, дәмдеуіштер."}},
 ];
