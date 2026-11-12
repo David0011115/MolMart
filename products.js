@@ -231,4 +231,7 @@ const PRODUCTS = [
   {name:"Наггетс бургер", brand:"Bravo", category:"Бургеры", weight:"200 г", price:null, labels:["halal"], image:"img/79.webp",
    composition:"Булочка, куриные наггетсы, майонез, сырный соус.", shelfLife:"", nutrition:"На 100 г: белки 7,24 г, жиры 9,93 г, углеводы 38,68 г, 276 ккал",
    kk:{name:"Наггетс бургер", composition:"Булочка, тауық наггетстері, майонез, ірімшік тұздығы.", nutrition:"100 г-да: ақуыз 7,24 г, май 9,93 г, көмірсу 38,68 г, 276 ккал"}},
+  {name:"Бурито стрипсы", brand:"Романовский продукт", category:"Донер", weight:"", price:null, labels:[], image:"img/80.webp",
+   composition:"", shelfLife:"", nutrition:"",
+   kk:{name:"Тауық стрипстері бар бурито", composition:""}},
 ];
